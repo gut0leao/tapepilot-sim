@@ -51,17 +51,22 @@ das métricas.
 
 ## Perturbações
 
-| Componente | Padrão | Taxa característica | Intensidade Dry/Wet |
-|---|---:|---:|---:|
-| Wow | `0,5 Hz`, `±1%` | `0,1–2,0 Hz` | `0–3%` |
-| Flutter | `8 Hz`, `±0,3%` | `2–20 Hz` | `0–1%` |
+| Componente | Padrão | Taxa característica | Intensidade Dry/Wet | Duração média |
+|---|---:|---:|---:|---:|
+| Wow | `0,5 Hz`, `±1%`, ocorrência `0%` | `0,1–2,0 Hz` | `0–3%` | `0,5–10 s` (`3 s`) |
+| Flutter | `8 Hz`, `±0,3%`, ocorrência `0%` | `2–20 Hz` | `0–1%` | `0,1–3 s` (`0,5 s`) |
 
-Wow e flutter possuem ativação, frequência e amplitude independentes. Quando
-ambos estão ativos, seus sinais são apenas somados; `Combined` não é estado nem
-preset. `Restaurar padrão` desliga ambos e recupera os valores da tabela.
-Parâmetros mudam em execução preservando a fase residual, e intensidade usa
-rampa de `100 ms`.
+Wow e flutter possuem ocorrência (`0–100%`), duração, taxa característica e
+amplitude independentes. Quando ambos estão ativos, seus sinais são apenas
+somados; `Combined` não é estado nem preset. `Restaurar padrão` zera as
+ocorrências e recupera os valores da tabela. Parâmetros mudam em execução
+preservando a fase residual, e intensidade usa rampa de `100 ms`.
 A perturbação modula a efetividade do acionamento antes da dinâmica da planta.
+
+Um gate determinístico alterna episódios ativos e inativos. A ocorrência define
+a fração média do tempo ativo; a duração inativa média é derivada da ocorrência
+e da duração ativa média. Cada intervalo recebe fator aleatório uniforme entre
+`0,5` e `1,5`. Ocorrência `0%` força inatividade e `100%` força atividade.
 
 Cada componente mistura ruído filtrado, envelope lento e uma senoide residual:
 

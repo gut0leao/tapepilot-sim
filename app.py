@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget,
     QHBoxLayout, QVBoxLayout, QGridLayout,
     QPushButton, QSlider, QLabel, QGraphicsView, QGraphicsScene,
-    QCheckBox
+    QScrollArea
 )
 from PySide6.QtSvgWidgets import QGraphicsSvgItem
 
@@ -76,8 +76,12 @@ class MainWindow(QMainWindow):
             item.setTransformOriginPoint(pivot)
 
         # ---------- Painel de controlo ----------
-        panel = QVBoxLayout()
-        top.addLayout(panel, 1)
+        panel_widget = QWidget()
+        panel = QVBoxLayout(panel_widget)
+        panel_scroll = QScrollArea()
+        panel_scroll.setWidgetResizable(True)
+        panel_scroll.setWidget(panel_widget)
+        top.addWidget(panel_scroll, 1)
 
         # Botões transporte
         btns = QGridLayout()
@@ -120,7 +124,6 @@ class MainWindow(QMainWindow):
 
         panel.addWidget(QLabel("Wow / Flutter"))
 
-        self.wow_enabled = QCheckBox("Wow ativo")
         self.wow_frequency = QSlider(Qt.Horizontal)
         self.wow_frequency.setRange(1, 20)
         self.wow_frequency.setValue(5)
@@ -129,15 +132,27 @@ class MainWindow(QMainWindow):
         self.wow_amplitude.setRange(0, 300)
         self.wow_amplitude.setValue(100)
         self.wow_amplitude_value = QLabel()
-        panel.addWidget(self.wow_enabled)
+        self.wow_occurrence = QSlider(Qt.Horizontal)
+        self.wow_occurrence.setRange(0, 100)
+        self.wow_occurrence.setValue(0)
+        self.wow_occurrence_value = QLabel()
+        self.wow_duration = QSlider(Qt.Horizontal)
+        self.wow_duration.setRange(5, 100)
+        self.wow_duration.setValue(30)
+        self.wow_duration_value = QLabel()
         panel.addWidget(QLabel("Taxa característica do wow"))
         panel.addWidget(self.wow_frequency)
         panel.addWidget(self.wow_frequency_value)
         panel.addWidget(QLabel("Intensidade do wow — Dry ↔ Wet"))
         panel.addWidget(self.wow_amplitude)
         panel.addWidget(self.wow_amplitude_value)
+        panel.addWidget(QLabel("Ocorrência média do wow"))
+        panel.addWidget(self.wow_occurrence)
+        panel.addWidget(self.wow_occurrence_value)
+        panel.addWidget(QLabel("Duração média do wow"))
+        panel.addWidget(self.wow_duration)
+        panel.addWidget(self.wow_duration_value)
 
-        self.flutter_enabled = QCheckBox("Flutter ativo")
         self.flutter_frequency = QSlider(Qt.Horizontal)
         self.flutter_frequency.setRange(20, 200)
         self.flutter_frequency.setValue(80)
@@ -146,18 +161,35 @@ class MainWindow(QMainWindow):
         self.flutter_amplitude.setRange(0, 100)
         self.flutter_amplitude.setValue(30)
         self.flutter_amplitude_value = QLabel()
-        panel.addWidget(self.flutter_enabled)
+        self.flutter_occurrence = QSlider(Qt.Horizontal)
+        self.flutter_occurrence.setRange(0, 100)
+        self.flutter_occurrence.setValue(0)
+        self.flutter_occurrence_value = QLabel()
+        self.flutter_duration = QSlider(Qt.Horizontal)
+        self.flutter_duration.setRange(1, 30)
+        self.flutter_duration.setValue(5)
+        self.flutter_duration_value = QLabel()
         panel.addWidget(QLabel("Taxa característica do flutter"))
         panel.addWidget(self.flutter_frequency)
         panel.addWidget(self.flutter_frequency_value)
         panel.addWidget(QLabel("Intensidade do flutter — Dry ↔ Wet"))
         panel.addWidget(self.flutter_amplitude)
         panel.addWidget(self.flutter_amplitude_value)
+        panel.addWidget(QLabel("Ocorrência média do flutter"))
+        panel.addWidget(self.flutter_occurrence)
+        panel.addWidget(self.flutter_occurrence_value)
+        panel.addWidget(QLabel("Duração média do flutter"))
+        panel.addWidget(self.flutter_duration)
+        panel.addWidget(self.flutter_duration_value)
 
         self.wow_frequency.valueChanged.connect(self.update_disturbance_labels)
         self.wow_amplitude.valueChanged.connect(self.update_disturbance_labels)
         self.flutter_frequency.valueChanged.connect(self.update_disturbance_labels)
         self.flutter_amplitude.valueChanged.connect(self.update_disturbance_labels)
+        self.wow_occurrence.valueChanged.connect(self.update_disturbance_labels)
+        self.wow_duration.valueChanged.connect(self.update_disturbance_labels)
+        self.flutter_occurrence.valueChanged.connect(self.update_disturbance_labels)
+        self.flutter_duration.valueChanged.connect(self.update_disturbance_labels)
         self.update_disturbance_labels()
 
         self.btn_restore_disturbances = QPushButton("Restaurar padrão")
@@ -208,12 +240,14 @@ class MainWindow(QMainWindow):
         self.timer.start(16)  # ~60 FPS UI (sim também, por enquanto)
 
     def restore_disturbances(self):
-        self.wow_enabled.setChecked(False)
         self.wow_frequency.setValue(5)
         self.wow_amplitude.setValue(100)
-        self.flutter_enabled.setChecked(False)
+        self.wow_occurrence.setValue(0)
+        self.wow_duration.setValue(30)
         self.flutter_frequency.setValue(80)
         self.flutter_amplitude.setValue(30)
+        self.flutter_occurrence.setValue(0)
+        self.flutter_duration.setValue(5)
 
     def update_disturbance_labels(self, _value=None):
         self.wow_frequency_value.setText(
@@ -228,6 +262,14 @@ class MainWindow(QMainWindow):
         self.flutter_amplitude_value.setText(
             f"Dry {self.flutter_amplitude.value() / 100.0:.2f}% Wet"
         )
+        self.wow_occurrence_value.setText(f"{self.wow_occurrence.value()}% do tempo")
+        self.wow_duration_value.setText(f"{self.wow_duration.value() / 10.0:.1f} s")
+        self.flutter_occurrence_value.setText(
+            f"{self.flutter_occurrence.value()}% do tempo"
+        )
+        self.flutter_duration_value.setText(
+            f"{self.flutter_duration.value() / 10.0:.1f} s"
+        )
 
     def tick(self):
         now = time.monotonic()
@@ -238,14 +280,18 @@ class MainWindow(QMainWindow):
         self.sim.s.tape_friction = self.sl_friction.value() / 100.0
         self.sim.s.encoder_jitter = self.sl_jitter.value() / 100.0
         disturbances = self.sim.faults.disturbances
-        disturbances.wow.enabled = self.wow_enabled.isChecked()
         disturbances.wow.set_frequency(self.wow_frequency.value() / 10.0)
         disturbances.wow.set_amplitude(self.wow_amplitude.value() / 10000.0)
-        disturbances.flutter.enabled = self.flutter_enabled.isChecked()
+        disturbances.wow.set_occurrence(self.wow_occurrence.value() / 100.0)
+        disturbances.wow.set_duration(self.wow_duration.value() / 10.0)
         disturbances.flutter.set_frequency(self.flutter_frequency.value() / 10.0)
         disturbances.flutter.set_amplitude(
             self.flutter_amplitude.value() / 10000.0
         )
+        disturbances.flutter.set_occurrence(
+            self.flutter_occurrence.value() / 100.0
+        )
+        disturbances.flutter.set_duration(self.flutter_duration.value() / 10.0)
 
         # simular
         s = self.sim.advance(dt)

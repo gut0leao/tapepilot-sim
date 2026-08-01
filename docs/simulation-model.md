@@ -96,16 +96,20 @@ uma aproximação da intenção futura, não um encoder modelado.
 
 A implementação em revisão combina ruído filtrado, envelope variável e uma
 pequena senoide residual para modular o alvo físico da planta. Wow usa padrão
-`0,5 Hz` e `1%`; flutter, `8 Hz` e `0,3%`.
-Cada componente pode ser ligado e ajustado independentemente na interface. Se
-ambos estiverem ativos, seus sinais são somados sem criar um estado adicional.
-Uma rampa de `100 ms` suaviza mudanças de ativação e amplitude. Os valores são
+`0,5 Hz`, `1%` e episódios médios de `3 s`; flutter, `8 Hz`, `0,3%` e
+episódios médios de `0,5 s`.
+Cada componente possui ocorrência, duração, taxa característica e intensidade
+independentes. Ocorrência representa a proporção média de tempo ativo; duração
+representa o tamanho médio do episódio. Episódios ativos e intervalos inativos
+variam entre `50%` e `150%` de seus valores médios. Se ambos estiverem ativos,
+seus sinais são somados sem criar um estado adicional. Uma rampa de `100 ms`
+suaviza o início, o fim e as mudanças de amplitude. Os valores são
 demonstrativos.
 
 Wow usa `85%` de componente irregular e `15%` periódica; flutter usa `90%` e
 `10%`. Geradores e envelopes possuem sementes fixas independentes. Os sliders
 controlam taxa característica e intensidade `Dry/Wet`, não uma frequência
-senoidal pura.
+senoidal pura. Geradores determinísticos separados controlam os episódios.
 
 ## Tensão
 
@@ -148,7 +152,8 @@ zero.
 - Não há escorregamento, back-tension ou saturação física de torque.
 - A tensão é apenas um indicador.
 - A direção reversa ainda não existe.
-- Os parâmetros não foram calibrados com dados experimentais.
+- Os parâmetros não foram calibrados com dados experimentais; essa calibração
+  está registrada na Issue [#14](https://github.com/gut0leao/tapepilot-sim/issues/14).
 - O controlador proporcional está sempre ativo; não existe comparação OFF/ON.
 - Os perfis de wow e flutter são demonstrativos e aguardam revisão integrada.
 - Não há reprodução de áudio ligada à velocidade da fita.

@@ -38,14 +38,17 @@ a velocidade física da planta.
 - **SC-RF-14:** O anti-windup deve usar integração condicional e limitar o termo
   integral à margem disponível do atuador.
 - **FI-RF-08:** Wow e flutter devem ser reproduzíveis.
-- **FI-RF-09:** Ativação, taxa característica e intensidade `Dry/Wet` devem
-  mudar em execução dentro das faixas do design.
+- **FI-RF-09:** Ocorrência, duração média, taxa característica e intensidade
+  `Dry/Wet` devem mudar em execução dentro das faixas do design.
 - **FI-RF-10:** Wow e flutter devem possuir controles independentes; seus sinais
   devem ser somados quando ambos estiverem ativos, sem estado `Combined`.
-- **FI-RF-12:** `Restaurar padrão` deve desligar ambos e recuperar `0,5 Hz/1%`
-  para wow e `8 Hz/0,3%` para flutter.
+- **FI-RF-12:** `Restaurar padrão` deve zerar a ocorrência de ambos e recuperar
+  `0,5 Hz/1%/3 s` para wow e `8 Hz/0,3%/0,5 s` para flutter.
 - **FI-RF-13:** Wow e flutter devem usar ruído filtrado dominante, envelope de
   presença variável, periodicidade residual e sementes fixas independentes.
+- **FI-RF-14:** Wow e flutter devem ocorrer em episódios independentes. A
+  ocorrência deve representar a proporção média do tempo ativo; episódios e
+  intervalos devem variar entre `50%` e `150%` de suas durações médias.
 - **FI-RF-11:** Alterações devem preservar fase e suavizar amplitude.
 - **TP-RF-10:** A telemetria deve distinguir nominal, `P/I/D`, `transfer_bias`,
   comandos solicitado/aplicado, saturação e bloqueio integral.
@@ -72,7 +75,7 @@ a velocidade física da planta.
 
 ### DSF-CA-07: controles independentes
 
-- **Dado** wow desligado e flutter ligado;
+- **Dado** ocorrência zero para wow e positiva para flutter;
 - **Quando** a simulação avança;
 - **Então** apenas flutter deve contribuir para a perturbação;
 - **E**, quando ambos estiverem ligados, a saída deve ser a soma dos dois sem
@@ -85,6 +88,15 @@ a velocidade física da planta.
 - **Então** devem produzir amostras idênticas;
 - **E** wow e flutter devem usar sequências diferentes;
 - **E** o sinal não deve repetir a antiga senoide após um período característico.
+
+### DSF-CA-09: episódios naturais
+
+- **Dado** ocorrência zero;
+- **Quando** a simulação avança;
+- **Então** a perturbação deve permanecer ausente;
+- **E**, com ocorrência intermediária, devem existir episódios ativos e
+  inativos reproduzíveis;
+- **E**, com ocorrência máxima, a perturbação deve permanecer ativa.
 
 ### DSF-CA-03: base nominal
 

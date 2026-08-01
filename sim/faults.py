@@ -25,6 +25,48 @@ class SmoothRandomSource:
         return self.value
 
 
+class EpisodeGate:
+    """Liga e desliga episódios com duração e ocorrência médias."""
+
+    def __init__(self, seed: int):
+        self.random = random.Random(seed)
+        self.active = False
+        self.remaining = 0.0
+        self.initialized = False
+
+    def _varied(self, mean: float) -> float:
+        return max(mean * self.random.uniform(0.5, 1.5), 0.001)
+
+    def step(self, dt: float, occurrence: float, mean_duration: float) -> bool:
+        occurrence = min(max(occurrence, 0.0), 1.0)
+        if occurrence <= 0.0:
+            self.active = False
+            self.remaining = 0.0
+            self.initialized = False
+            return False
+        if occurrence >= 1.0:
+            self.active = True
+            self.remaining = 0.0
+            self.initialized = False
+            return True
+
+        mean_off = mean_duration * (1.0 - occurrence) / occurrence
+        if not self.initialized:
+            self.active = self.random.random() < occurrence
+            mean_state_duration = mean_duration if self.active else mean_off
+            self.remaining = self._varied(mean_state_duration)
+            self.initialized = True
+
+        self.remaining -= dt
+        if self.remaining <= 0.0:
+            self.active = not self.active
+            if self.active:
+                self.remaining = self._varied(mean_duration)
+            else:
+                self.remaining = self._varied(mean_off)
+        return self.active
+
+
 class NaturalDisturbance:
     """Perturbação irregular com pequena componente periódica."""
 
@@ -37,6 +79,8 @@ class NaturalDisturbance:
         random_seed: int,
         periodic_fraction: float,
         envelope_interval: float,
+        occurrence: float,
+        mean_duration: float,
         ramp_seconds: float = 0.1,
     ):
         self.frequency_range = frequency_range
@@ -44,11 +88,13 @@ class NaturalDisturbance:
         self.ramp_seconds = ramp_seconds
         self.phase = 0.0
         self.current_amplitude = 0.0
-        self.enabled = False
+        self.occurrence = occurrence
+        self.mean_duration = mean_duration
         self.periodic_fraction = periodic_fraction
         self.envelope_interval = envelope_interval
         self.noise = SmoothRandomSource(random_seed)
         self.envelope = SmoothRandomSource(random_seed + 1)
+        self.episodes = EpisodeGate(random_seed + 2)
         self.set_frequency(frequency_hz)
         self.set_amplitude(amplitude)
 
@@ -62,8 +108,15 @@ class NaturalDisturbance:
             max(value, self.amplitude_range[0]), self.amplitude_range[1]
         )
 
+    def set_occurrence(self, value: float):
+        self.occurrence = min(max(value, 0.0), 1.0)
+
+    def set_duration(self, value: float):
+        self.mean_duration = max(value, 0.001)
+
     def step(self, dt: float) -> float:
-        target = self.amplitude if self.enabled else 0.0
+        active = self.episodes.step(dt, self.occurrence, self.mean_duration)
+        target = self.amplitude if active else 0.0
         blend = min(max(dt / self.ramp_seconds, 0.0), 1.0)
         self.current_amplitude += (target - self.current_amplitude) * blend
         characteristic_period = 1.0 / self.frequency_hz
@@ -94,10 +147,10 @@ class WowFlutterGenerator:
 
     def __init__(self):
         self.wow = NaturalDisturbance(
-            0.5, 0.01, (0.1, 2.0), (0.0, 0.03), 1103, 0.15, 2.0
+            0.5, 0.01, (0.1, 2.0), (0.0, 0.03), 1103, 0.15, 2.0, 0.0, 3.0
         )
         self.flutter = NaturalDisturbance(
-            8.0, 0.003, (2.0, 20.0), (0.0, 0.01), 2207, 0.10, 0.5
+            8.0, 0.003, (2.0, 20.0), (0.0, 0.01), 2207, 0.10, 0.5, 0.0, 0.5
         )
 
     def step(self, dt: float) -> tuple[float, float, float]:

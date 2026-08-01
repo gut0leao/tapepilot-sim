@@ -41,16 +41,20 @@ nome, ele ainda não altera a RPM realimentada, a telemetria ou o gráfico.
 
 ### Wow e flutter
 
-Wow e flutter possuem ativação e sliders independentes. Ligar os
-dois apenas soma naturalmente seus efeitos; não existe um estado `Combined` a
-ser selecionado ou armazenado. `Restaurar padrão` desliga ambos e recupera:
+Wow e flutter possuem sliders independentes. Quando os dois ocorrem ao mesmo
+tempo, seus efeitos são somados naturalmente; não existe um estado `Combined` a
+ser selecionado ou armazenado. `Restaurar padrão` zera a ocorrência de ambos e
+recupera:
 
-- wow em `0,5 Hz` e `1%`;
-- flutter em `8 Hz` e `0,3%`.
+- wow em `0,5 Hz`, `1%` e duração média de `3 s`;
+- flutter em `8 Hz`, `0,3%` e duração média de `0,5 s`.
 
 `Taxa característica` controla a velocidade média das irregularidades.
 `Intensidade — Dry ↔ Wet` controla quanto cada perturbação afeta a planta. Os
-checkboxes funcionam como bypass, preservando as posições dos sliders.
+sliders de `Ocorrência média` determinam a proporção média do tempo com a
+perturbação presente; em zero, o efeito permanece ausente. `Duração média`
+controla o tamanho típico dos episódios. Episódios e intervalos variam
+aleatoriamente em torno desses valores.
 
 O sinal combina ruído filtrado dominante, presença variável e uma pequena
 periodicidade residual. Wow e flutter usam sequências distintas, mas

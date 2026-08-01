@@ -47,17 +47,19 @@ ser revistos depois de medições em hardware real.
 
 Wow e flutter usam ruído colorido como componente dominante, envelope variável
 e apenas `15%` e `10%` de periodicidade residual. Possuem controles independentes
-de taxa característica e intensidade `Dry/Wet`, com sementes fixas distintas.
+de taxa característica, intensidade `Dry/Wet`, ocorrência e duração média, com
+sementes fixas distintas. Ocorrência substitui o liga/desliga contínuo:
+perturbações surgem em episódios determinísticos, mas irregulares.
 
 ## Evidências de implementação
 
 - **Código:** componentes extraídos em `sim/state.py`, `controller.py`,
   `plant.py`, `faults.py` e `encoder.py`; scheduler fixo e wow/flutter estão
   implementados localmente para revisão; encoder discreto e PID ainda pendem.
-- **Testes:** vinte testes passam, incluindo scheduler, independência,
+- **Testes:** vinte e quatro testes passam, incluindo scheduler, independência,
   irregularidade e reprodutibilidade das perturbações;
   workflow [Quality 30703602470](https://github.com/gut0leao/tapepilot-sim/actions/runs/30703602470) aprovado.
-- **Validação manual:** interface e controles naturais de wow/flutter aprovados
-  pelo mantenedor em 2026-08-01, sem regressões aparentes.
+- **Validação manual:** interface, controles naturais e episódios aleatórios de
+  wow/flutter aprovados pelo mantenedor em 2026-08-01, sem regressões aparentes.
 - **Commit/PR:** commit `6e58f98` implementa a extração da Issue #4.
 - **Limitações remanescentes:** parâmetros ainda não identificados fisicamente.

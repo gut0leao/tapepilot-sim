@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from sim.controller import ProportionalController
 from sim.encoder import VisualEncoder
-from sim.faults import FaultModel, NaturalDisturbance, WowFlutterGenerator
+from sim.faults import EpisodeGate, FaultModel, NaturalDisturbance, WowFlutterGenerator
 from sim.plant import FirstOrderPlant
 from sim.runtime import FixedStepScheduler
 
@@ -36,18 +36,18 @@ class ExtractedComponentTests(unittest.TestCase):
     def test_disturbance_is_deterministic(self):
         first = WowFlutterGenerator()
         second = WowFlutterGenerator()
-        first.wow.enabled = True
-        first.flutter.enabled = True
-        second.wow.enabled = True
-        second.flutter.enabled = True
+        first.wow.set_occurrence(1.0)
+        first.flutter.set_occurrence(1.0)
+        second.wow.set_occurrence(1.0)
+        second.flutter.set_occurrence(1.0)
 
         self.assertEqual(first.step(0.001), second.step(0.001))
 
     def test_frequency_change_preserves_phase(self):
         disturbance = NaturalDisturbance(
-            0.5, 0.01, (0.1, 2.0), (0.0, 0.03), 1, 0.15, 2.0
+            0.5, 0.01, (0.1, 2.0), (0.0, 0.03), 1, 0.15, 2.0, 1.0, 3.0
         )
-        disturbance.enabled = True
+        disturbance.set_occurrence(1.0)
         disturbance.step(0.1)
         phase_before = disturbance.phase
 
@@ -57,7 +57,7 @@ class ExtractedComponentTests(unittest.TestCase):
 
     def test_disturbance_parameters_are_clamped(self):
         disturbance = NaturalDisturbance(
-            0.5, 0.01, (0.1, 2.0), (0.0, 0.03), 1, 0.15, 2.0
+            0.5, 0.01, (0.1, 2.0), (0.0, 0.03), 1, 0.15, 2.0, 0.0, 3.0
         )
 
         disturbance.set_frequency(10.0)
@@ -68,7 +68,7 @@ class ExtractedComponentTests(unittest.TestCase):
 
     def test_disturbance_modulates_physical_target(self):
         faults = FaultModel()
-        faults.disturbances.wow.enabled = True
+        faults.disturbances.wow.set_occurrence(1.0)
         target = 1800.0
 
         for _ in range(125):
@@ -78,14 +78,14 @@ class ExtractedComponentTests(unittest.TestCase):
 
     def test_wow_and_flutter_are_independent_and_additive(self):
         generator = WowFlutterGenerator()
-        generator.flutter.enabled = True
+        generator.flutter.set_occurrence(1.0)
 
         wow, flutter, total = generator.step(0.001)
 
         self.assertEqual(wow, 0.0)
         self.assertEqual(total, flutter)
 
-        generator.wow.enabled = True
+        generator.wow.set_occurrence(1.0)
         wow, flutter, total = generator.step(0.001)
 
         self.assertAlmostEqual(total, wow + flutter)
@@ -93,8 +93,10 @@ class ExtractedComponentTests(unittest.TestCase):
     def test_natural_disturbance_is_reproducible(self):
         first = WowFlutterGenerator()
         second = WowFlutterGenerator()
-        first.wow.enabled = second.wow.enabled = True
-        first.flutter.enabled = second.flutter.enabled = True
+        first.wow.set_occurrence(1.0)
+        second.wow.set_occurrence(1.0)
+        first.flutter.set_occurrence(1.0)
+        second.flutter.set_occurrence(1.0)
 
         first_values = [first.step(0.001) for _ in range(1000)]
         second_values = [second.step(0.001) for _ in range(1000)]
@@ -114,11 +116,40 @@ class ExtractedComponentTests(unittest.TestCase):
 
     def test_wow_is_not_a_repeating_sine(self):
         generator = WowFlutterGenerator()
-        generator.wow.enabled = True
+        generator.wow.set_occurrence(1.0)
 
         values = [generator.step(0.001)[0] for _ in range(4001)]
 
         self.assertNotAlmostEqual(values[2000], values[4000])
+
+    def test_zero_occurrence_keeps_disturbance_off(self):
+        generator = WowFlutterGenerator()
+
+        values = [generator.step(0.001) for _ in range(1000)]
+
+        self.assertTrue(all(value == (0.0, 0.0, 0.0) for value in values))
+
+    def test_episode_gate_is_reproducible(self):
+        first = EpisodeGate(10)
+        second = EpisodeGate(10)
+
+        first_values = [first.step(0.1, 0.5, 1.0) for _ in range(100)]
+        second_values = [second.step(0.1, 0.5, 1.0) for _ in range(100)]
+
+        self.assertEqual(first_values, second_values)
+
+    def test_full_occurrence_keeps_episode_active(self):
+        gate = EpisodeGate(10)
+
+        self.assertTrue(all(gate.step(0.1, 1.0, 1.0) for _ in range(100)))
+
+    def test_partial_occurrence_has_active_and_inactive_episodes(self):
+        gate = EpisodeGate(10)
+
+        values = [gate.step(0.1, 0.5, 1.0) for _ in range(100)]
+
+        self.assertIn(True, values)
+        self.assertIn(False, values)
 
     def test_scheduler_converts_gui_time_to_fixed_steps(self):
         scheduler = FixedStepScheduler()

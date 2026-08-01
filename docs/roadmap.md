@@ -46,6 +46,7 @@ OFF` e `ON`.
 ## 5. Fidelidade e validação física
 
 - [ ] [Evoluir o modelo mecânico de fita e bobinas](https://github.com/gut0leao/tapepilot-sim/issues/3).
+- [ ] [Calibrar valores padrão de wow e flutter](https://github.com/gut0leao/tapepilot-sim/issues/14).
 - [ ] Caracterizar sensor, motor, atuador, inércia e cargas de um mecanismo real.
 - [ ] Ajustar a planta simulada com dados medidos.
 - [ ] Comparar resposta simulada e resposta real.
