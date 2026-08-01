@@ -31,7 +31,7 @@ As variáveis principais são:
 | `REW` | 2600 RPM |
 
 `REW` ainda não representa uma velocidade negativa. A mudança está proposta em
-`docs/specs/reverse-transport/`.
+`docs/changes/reverse-transport/`.
 
 Qualquer string diferente de `PLAY`, `FF`, `REW` e `PAUSE` recebe setpoint zero,
 embora seu texto seja preservado no campo `transport`. Não há validação explícita
@@ -129,5 +129,6 @@ zero.
 - A direção reversa ainda não existe.
 - Os parâmetros não foram calibrados com dados experimentais.
 
-Qualquer mudança nas equações ou no significado das variáveis deve atualizar
-este documento e possuir uma spec quando alterar o comportamento observável.
+Qualquer mudança nas equações ou no significado das variáveis deve começar por
+um delta aprovado e, ao ser concluída, atualizar este documento e as specs
+afetadas.

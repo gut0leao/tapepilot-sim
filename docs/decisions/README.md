@@ -21,4 +21,4 @@ mudar, crie um novo ADR e marque o anterior como substituído.
 ## Índice
 
 - [ADR 0001 — Processo híbrido de documentação](0001-processo-hibrido-de-documentacao.md)
-
+- [ADR 0002 — Specs vivas e deltas de mudança](0002-specs-vivas-e-deltas-de-mudanca.md)

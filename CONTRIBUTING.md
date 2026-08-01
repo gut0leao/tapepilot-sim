@@ -12,17 +12,19 @@ Classifique a mudança:
 | Mudança | Registro esperado |
 |---|---|
 | Correção editorial ou manutenção interna | descrição no commit/PR |
-| Correção de comportamento especificado | referência ao requisito existente |
-| Nova funcionalidade ou mudança observável | spec |
-| Mudança no modelo físico | spec e `simulation-model.md` |
+| Correção de comportamento especificado | referência ao requisito vigente |
+| Nova funcionalidade ou mudança observável | proposta e delta |
+| Mudança no modelo físico | proposta, delta e `simulation-model.md` |
 | Decisão técnica duradoura | ADR |
 
-Consulte o [processo de especificações](docs/specs/README.md) e os
-[ADRs](docs/decisions/README.md).
+Consulte as [specs de capacidade](docs/specs/README.md), o
+[processo de mudanças](docs/changes/README.md) e os [ADRs](docs/decisions/README.md).
+Para prioridade, sprint e estados do backlog, consulte o
+[guia de gestão do projeto](docs/project-management.md).
 
 ## Implementação
 
-- Preserve o comportamento caracterizado, salvo quando uma spec aprovada o
+- Preserve os requisitos vigentes, salvo quando uma proposta aprovada os
   alterar explicitamente.
 - Mantenha o domínio testável sem Qt.
 - Evite misturar refatoração ampla e mudança funcional no mesmo passo.
@@ -44,10 +46,11 @@ python3 -m pytest
 
 ## Checklist de conclusão
 
-- [ ] A mudança corresponde a uma spec aprovada ou dispensa spec.
+- [ ] A mudança possui proposta aprovada ou dispensa proposta.
 - [ ] Requisitos e critérios de aceitação foram verificados.
 - [ ] Testes novos e existentes passam.
 - [ ] Documentação clássica foi atualizada.
 - [ ] Decisões duradouras possuem ADR.
-- [ ] A spec contém evidências e estado correto.
+- [ ] Deltas foram incorporados às specs afetadas.
+- [ ] A proposta contém evidências e foi arquivada.
 - [ ] Limitações remanescentes estão registradas.

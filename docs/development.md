@@ -81,18 +81,19 @@ requests.
 - Identificadores de código em inglês.
 - Documentação do projeto em português.
 - Uma responsabilidade principal por módulo.
-- Novos comportamentos começam por uma spec aprovada.
+- Novos comportamentos começam por proposta e delta aprovados.
 - Decisões duradouras são registradas em ADRs.
 - A documentação deve distinguir comportamento atual de intenção futura.
 
 ## Fluxo recomendado para mudanças
 
-1. Classifique a mudança conforme `docs/specs/README.md`.
-2. Crie ou atualize a spec quando houver mudança de comportamento.
+1. Classifique a mudança conforme `docs/changes/README.md`.
+2. Crie proposta e delta quando houver mudança de comportamento.
 3. Registre um ADR se houver uma decisão arquitetural duradoura.
 4. Implemente tarefas pequenas e verificáveis.
 5. Execute testes e validações estáticas.
-6. Atualize a documentação do comportamento resultante.
+6. Incorpore o delta às specs afetadas.
+7. Atualize a documentação clássica e arquive a proposta.
 
 Consulte também a [Definition of Done](specs/README.md#definition-of-done).
 

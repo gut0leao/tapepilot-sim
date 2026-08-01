@@ -1,115 +1,90 @@
-# Processo de especificações
+# Specs de capacidade
 
 ## Objetivo
 
-Uma spec define o comportamento esperado antes da implementação. Dentro de seu
-escopo, ela é a fonte de verdade para requisitos e critérios de aceitação.
+As specs deste diretório descrevem o comportamento vigente do TapePilot. Cada
+uma representa uma capacidade coesa do sistema e funciona como fonte de verdade
+para seus requisitos observáveis.
 
-Documentos em `architecture.md` e `simulation-model.md` explicam como o sistema
-é hoje. As specs descrevem uma mudança desejada até que ela seja implementada e
-incorporada à documentação corrente.
+As specs são documentos vivos: depois que uma mudança é implementada e
+validada, o delta aprovado é incorporado à spec afetada. O histórico permanece
+no Git e na proposta arquivada em `docs/changes/archive/`.
 
-## Quando uma spec é necessária
+## Capacidades
 
-Crie ou atualize uma spec quando a mudança:
+| Capacidade | Estado | Responsabilidade |
+|---|---|---|
+| [Modos de transporte](transport-modes/spec.md) | `Implemented` | modos, setpoints e seleção |
+| [Controle de velocidade](speed-control/spec.md) | `Implemented` | erro, controlador e resposta |
+| [Injeção de falhas](fault-injection/spec.md) | `Implemented` | atrito, jitter e tensão |
+| [Visualização mecânica](mechanics-visualization/spec.md) | `Implemented` | SVGs, escalas e movimento |
+| [Telemetria e gráficos](telemetry-and-plots/spec.md) | `Implemented` | dados exibidos e histórico |
+| [Runtime da simulação](simulation-runtime/spec.md) | `Implemented` | temporização, separação e execução |
 
-- adiciona uma funcionalidade;
-- altera comportamento observável;
-- modifica equações ou premissas do modelo;
-- introduz um componente ou interface relevante;
-- necessita de vários critérios de aceitação.
+## Granularidade
 
-Uma spec própria normalmente não é necessária para:
+Uma spec agrupa requisitos que:
 
-- correção de texto ou formatação;
-- renomeação interna sem efeito de comportamento;
-- atualização de dependência sem mudança funcional;
-- correção pequena que restaura um requisito já documentado.
+- pertencem ao mesmo conceito do domínio;
+- costumam mudar pelo mesmo motivo;
+- podem ser validados como uma capacidade coerente;
+- possuem responsabilidades técnicas próximas.
 
-Se houver dúvida, prefira uma spec curta.
-
-## Estrutura de uma funcionalidade
-
-```text
-docs/specs/<nome-da-funcionalidade>/
-├── spec.md
-├── design.md
-└── tasks.md
-```
-
-- `spec.md`: problema, escopo, requisitos e critérios de aceitação;
-- `design.md`: solução técnica, alternativas e riscos;
-- `tasks.md`: trabalho executável e verificável.
-
-Copie [`template.md`](template.md) para iniciar uma proposta.
+Não se cria uma spec por botão ou fórmula, nem uma única spec para toda a
+aplicação. Uma nova capacidade nasce por meio de uma change e, quando passa a
+existir, ganha uma spec baseada em [`template.md`](template.md).
 
 ## Estados
 
 | Estado | Significado |
 |---|---|
-| `Draft` | Em elaboração; ainda pode mudar livremente |
-| `Approved` | Escopo aceito e pronto para implementação |
-| `In Progress` | Implementação em andamento |
-| `Implemented` | Critérios satisfeitos e documentação atualizada |
-| `Superseded` | Substituída por outra spec |
+| `Draft` | documentação inicial de uma capacidade vigente sendo preparada |
+| `Implemented` | comportamento vigente e evidências registradas |
+| `Superseded` | capacidade substituída por outra organização |
 
-Somente uma decisão consciente deve mover a spec para `Approved`. Marcar como
-`Implemented` exige evidência de validação, preferencialmente testes.
+`Approved` e `In Progress` pertencem às changes, não às specs AS-IS.
 
-## Fluxo
+## Alterando uma capacidade
 
-1. Descrever problema, objetivo e limites em `spec.md`.
-2. Tornar cada requisito observável e numerado.
-3. Revisar questões em aberto e aprovar a spec.
-4. Registrar a solução em `design.md`.
-5. Dividir o trabalho em `tasks.md`.
-6. Implementar e validar os critérios de aceitação.
-7. Atualizar a documentação clássica.
-8. Marcar a spec como `Implemented`.
+Mudanças observáveis não são editadas diretamente na spec vigente antes da
+implementação. Elas começam em `docs/changes/<nome>/`:
+
+```text
+proposal.md
+spec-delta.md
+design.md
+tasks.md
+```
+
+O fluxo completo está em [Processo de mudanças](../changes/README.md).
+
+Os `tasks.md` das capacidades registram o estabelecimento do baseline. Tarefas
+de mudanças posteriores permanecem nas changes arquivadas e não são copiadas
+para esses arquivos.
 
 ## Definition of Done
 
-Uma funcionalidade está pronta quando:
+Uma mudança está pronta quando:
 
-- todos os requisitos aprovados foram implementados;
-- todos os critérios de aceitação possuem evidência de validação;
-- os testes relevantes passam;
-- a documentação clássica descreve o comportamento resultante;
-- limitações conhecidas foram registradas;
-- `tasks.md` reflete o trabalho concluído;
-- a spec está marcada como `Implemented`.
-
-## Linguagem normativa
-
-- **Deve:** requisito obrigatório.
-- **Não deve:** proibição obrigatória.
-- **Pode:** comportamento permitido ou opcional.
-
-Evite descrever detalhes de implementação em requisitos. “A RPM deve convergir
-para um valor negativo” é requisito; “usar uma variável chamada `direction`” é
-design.
+- o delta aprovado foi implementado;
+- critérios de aceitação possuem evidência;
+- testes relevantes passam;
+- specs afetadas representam o novo comportamento;
+- documentação clássica foi atualizada;
+- limitações remanescentes foram registradas;
+- a proposta foi movida para `docs/changes/archive/`.
 
 ## Rastreabilidade
 
-Requisitos usam identificadores como `RF-01` e `RNF-01`. Testes relacionados
-devem mencionar esses identificadores no nome, comentário ou docstring quando
-isso ajudar a localizar a evidência.
+Cada capacidade usa um prefixo estável nos requisitos:
 
-`tasks.md` não substitui a spec: concluir todas as tarefas não significa que os
-critérios de aceitação foram necessariamente satisfeitos.
+| Prefixo | Capacidade |
+|---|---|
+| `TM` | modos de transporte |
+| `SC` | controle de velocidade |
+| `FI` | injeção de falhas |
+| `MV` | visualização mecânica |
+| `TP` | telemetria e gráficos |
+| `SR` | runtime da simulação |
 
-## Evidências
-
-Ao concluir a implementação, registre na spec:
-
-- arquivos de implementação;
-- testes e requisitos cobertos;
-- validações manuais necessárias;
-- commit ou pull request, quando houver;
-- limitações remanescentes.
-
-## Índice
-
-| Spec | Estado | Requisitos | Implementação |
-|---|---|---:|---|
-| [Transporte reverso](reverse-transport/spec.md) | `Draft` | RF-01–RF-07 | — |
+Testes e deltas devem citar esses identificadores quando aplicável.

@@ -66,6 +66,7 @@ tapepilot-sim/
 ├── assets/
 │   └── svg/
 ├── docs/
+│   ├── changes/
 │   ├── decisions/
 │   └── specs/
 ├── sim/
@@ -77,15 +78,18 @@ tapepilot-sim/
 
 ## Documentação
 
+- [Guia da documentação](docs/README.md)
 - [Arquitetura](docs/architecture.md)
 - [Ambiente de desenvolvimento](docs/development.md)
 - [Guia de uso](docs/user-guide.md)
 - [Modelo da simulação](docs/simulation-model.md)
 - [Inventário da implementação](docs/implementation-inventory.md)
 - [Roadmap](docs/roadmap.md)
+- [Gestão do projeto](docs/project-management.md)
 - [Glossário](docs/glossary.md)
 - [Decisões arquiteturais](docs/decisions/README.md)
-- [Processo de especificações](docs/specs/README.md)
+- [Specs de capacidade](docs/specs/README.md)
+- [Propostas de mudança](docs/changes/README.md)
 - [Como contribuir](CONTRIBUTING.md)
 - [Histórico de mudanças](CHANGELOG.md)
 
@@ -93,13 +97,14 @@ tapepilot-sim/
 
 O projeto adota uma abordagem híbrida de documentação:
 
-- documentação clássica descreve o sistema existente;
+- documentação clássica explica o sistema existente;
 - ADRs registram decisões duradouras;
-- specs definem novas funcionalidades e mudanças de comportamento antes da
-  implementação.
+- specs vivas definem os requisitos vigentes por capacidade;
+- propostas de mudança descrevem deltas antes da implementação.
 
-Uma mudança pequena que apenas restaura um comportamento já definido não exige
-uma spec própria. Consulte o [guia de especificações](docs/specs/README.md).
+Uma correção que apenas restaura um requisito vigente pode dispensar proposta.
+Consulte as [specs](docs/specs/README.md) e o
+[processo de mudanças](docs/changes/README.md).
 
 ## Licença
 

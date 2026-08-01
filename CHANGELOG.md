@@ -15,13 +15,16 @@ versão estável publicada.
 - Núcleo de simulação importável sem Qt.
 - Testes de caracterização do comportamento atual.
 - Verificação automática de documentação e testes.
+- Specs vivas por capacidade e processo de mudanças baseado em deltas.
+- Guia mínimo para backlog, GitHub Project e sprints.
+- GitHub Project configurado e backlog inicial criado a partir do roadmap.
 
 ### Changed
 
 - O relógio da interface passou a usar fonte monotônica.
 - SVGs recebem dimensões visuais explícitas.
+- GitHub Actions oficiais atualizadas para versões baseadas em Node.js 24.
 
 ### Fixed
 
 - Caminho do arquivo SVG do capstan.
-

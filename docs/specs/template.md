@@ -1,60 +1,42 @@
-# [Nome da funcionalidade]
+# [Nome da capacidade]
 
 - **Estado:** Draft
-- **Responsável:** [nome]
-- **Data:** AAAA-MM-DD
+- **Última atualização:** AAAA-MM-DD
 
-## Contexto
+## Propósito
 
-[Que problema existe e por que precisa ser resolvido?]
+[Responsabilidade coesa desta capacidade.]
 
-## Objetivo
+## Escopo
 
-[Qual resultado observável esta funcionalidade deve produzir?]
+- [Comportamento pertencente à capacidade.]
 
 ## Fora de escopo
 
-- [O que esta especificação deliberadamente não resolverá?]
+- [Comportamento deliberadamente pertencente a outra capacidade.]
 
 ## Requisitos funcionais
 
-- **RF-01:** O sistema deve...
-- **RF-02:** O usuário deve poder...
-- **RF-03:** O sistema não deve...
+- **XX-RF-01:** O sistema deve...
 
 ## Requisitos não funcionais
 
-- **RNF-01:** A atualização deve...
-- **RNF-02:** O componente deve ser testável sem...
+- **XX-RNF-01:** A capacidade deve...
 
 ## Critérios de aceitação
 
-### Cenário 1: [nome]
+### XX-CA-01: [nome]
 
 - **Dado** que...
 - **Quando**...
 - **Então**...
 
-### Cenário 2: [nome]
+## Limitações vigentes
 
-- **Dado** que...
-- **Quando**...
-- **Então**...
+- [Limitação observável do comportamento atual.]
 
-## Casos extremos
+## Evidências
 
-- [Valores inválidos, limites e transições relevantes.]
-
-## Questões em aberto
-
-- [Decisões que impedem a aprovação da spec.]
-
-## Evidências de implementação
-
-> Preencher durante a implementação e antes de marcar a spec como `Implemented`.
-
-- **Código:** [arquivos ou links]
+- **Código:** [arquivos]
 - **Testes:** [testes e requisitos cobertos]
-- **Validação manual:** [procedimento, resultado e data]
-- **Commit/PR:** [identificador]
-- **Limitações remanescentes:** [lista ou “nenhuma”]
+- **Validação manual:** [procedimento e data]

@@ -9,11 +9,21 @@ import unicodedata
 ROOT = Path(__file__).resolve().parent.parent
 MARKDOWN_LINK = re.compile(r"\[[^]]*\]\(([^)]+)\)")
 REQUIRED_SPEC_SECTIONS = {
-    "## Contexto",
-    "## Objetivo",
+    "## Propósito",
+    "## Escopo",
     "## Fora de escopo",
     "## Requisitos funcionais",
+    "## Requisitos não funcionais",
     "## Critérios de aceitação",
+    "## Limitações vigentes",
+    "## Evidências",
+}
+REQUIRED_CHANGE_SECTIONS = {
+    "## Problema",
+    "## Objetivo",
+    "## Fora de escopo",
+    "## Impacto",
+    "## Questões em aberto",
     "## Evidências de implementação",
 }
 
@@ -65,6 +75,7 @@ def check_links(path):
 
 def check_specs():
     errors = []
+    requirement_locations = {}
     for path in sorted((ROOT / "docs/specs").glob("*/spec.md")):
         text = path.read_text(encoding="utf-8")
         for section in REQUIRED_SPEC_SECTIONS:
@@ -72,8 +83,41 @@ def check_specs():
                 errors.append(
                     f"{path.relative_to(ROOT)}: seção obrigatória ausente: {section}"
                 )
-        if not re.search(r"\*\*Estado:\*\* (Draft|Approved|In Progress|Implemented|Superseded)", text):
+        if not re.search(r"\*\*Estado:\*\* (Draft|Implemented|Superseded)", text):
             errors.append(f"{path.relative_to(ROOT)}: estado ausente ou inválido")
+        for requirement_id in re.findall(r"\*\*([A-Z]{2}-(?:RF|RNF)-\d{2}):\*\*", text):
+            requirement_locations.setdefault(requirement_id, []).append(path)
+        for companion in ("design.md", "tasks.md"):
+            if not (path.parent / companion).exists():
+                errors.append(
+                    f"{path.relative_to(ROOT)}: arquivo obrigatório ausente: {companion}"
+                )
+    for requirement_id, paths in requirement_locations.items():
+        if len(paths) > 1:
+            locations = ", ".join(str(path.relative_to(ROOT)) for path in paths)
+            errors.append(f"requisito duplicado {requirement_id}: {locations}")
+    return errors
+
+
+def check_changes():
+    errors = []
+    for path in sorted((ROOT / "docs/changes").glob("*/proposal.md")):
+        text = path.read_text(encoding="utf-8")
+        for section in REQUIRED_CHANGE_SECTIONS:
+            if section not in text:
+                errors.append(
+                    f"{path.relative_to(ROOT)}: seção obrigatória ausente: {section}"
+                )
+        if not re.search(
+            r"\*\*Estado:\*\* (Draft|Approved|In Progress|Implemented|Rejected)",
+            text,
+        ):
+            errors.append(f"{path.relative_to(ROOT)}: estado ausente ou inválido")
+        for companion in ("spec-delta.md", "design.md", "tasks.md"):
+            if not (path.parent / companion).exists():
+                errors.append(
+                    f"{path.relative_to(ROOT)}: arquivo obrigatório ausente: {companion}"
+                )
     return errors
 
 
@@ -82,6 +126,7 @@ def main():
     for path in markdown_files():
         errors.extend(check_links(path))
     errors.extend(check_specs())
+    errors.extend(check_changes())
 
     if errors:
         print("Falhas na documentação:")

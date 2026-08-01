@@ -22,7 +22,7 @@ A tela é dividida em:
 | `REW` | define setpoint de 2600 RPM |
 
 `REW` ainda não inverte o sentido. Esse comportamento está registrado como
-limitação e possui uma spec em elaboração.
+limitação e possui uma proposta de mudança em elaboração.
 
 ## Injeção de falhas
 

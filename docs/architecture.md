@@ -101,6 +101,11 @@ tests/
 Os arquivos marcados como planejados representam a direção futura. A migração
 deve ser incremental e coberta pelos testes de caracterização existentes.
 
+As responsabilidades vigentes são normatizadas pelas
+[specs de capacidade](specs/README.md). Alterações arquiteturais observáveis
+devem começar por uma proposta em `docs/changes/` e, quando duradouras, por um
+novo ADR.
+
 ## Diagrama de componentes
 
 ```mermaid

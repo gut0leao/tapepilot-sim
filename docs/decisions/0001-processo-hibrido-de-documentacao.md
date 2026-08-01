@@ -3,6 +3,9 @@
 - **Estado:** Aceito
 - **Data:** 2026-07-31
 
+> A organização das specs definida aqui foi refinada pelo
+> [ADR 0002](0002-specs-vivas-e-deltas-de-mudanca.md).
+
 ## Contexto
 
 O TapePilot começou como um protótipo em um único arquivo. O README original
@@ -52,4 +55,3 @@ renomeações e manutenção interna sem mudança de comportamento.
 - Mudanças de comportamento exigem manutenção documental.
 - Specs e documentos precisam ser revisados junto com o código.
 - Será necessário evitar especificações detalhadas além do necessário.
-
