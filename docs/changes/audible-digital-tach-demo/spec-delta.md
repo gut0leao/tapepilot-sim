@@ -32,12 +32,42 @@ flutter devem atuar sobre a velocidade física da planta.
   durante a simulação.
 - **SC-RF-09:** Em `ON`, o controlador deve usar a medição do encoder para
   reduzir o erro da velocidade física.
+- **SC-RF-10:** O comando nominal deve atingir o setpoint em regime permanente
+  na planta nominal sem perturbação ou carga adicional; `OFF` deve mantê-lo fixo
+  e `ON` deve somar a ele a correção do PID.
+- **SC-RF-11:** O atuador deve aceitar comando normalizado em `[-1, +1]`; a
+  planta deve usar `plant_max_rpm = 3000` configurável, calcular o nominal por
+  `setpoint_rpm / plant_max_rpm` e saturar a soma do nominal com a correção PID.
+- **SC-RF-12:** A troca `OFF → ON` deve inicializar a derivada pela medição atual
+  e usar `transfer_bias` para que a correção comece em zero, inclusive com
+  `Ki = 0`; o bias deve decair a zero em `250 ms`. Em `ON → OFF`, o PID deve
+  parar de atualizar, reduzir sua última correção linearmente a zero em `250 ms`
+  e limpar seus estados ao final.
+- **SC-RF-13:** O termo derivativo deve ser calculado sobre a medição para evitar
+  pico causado por mudanças de setpoint.
+- **SC-RF-14:** O PID deve bloquear a integração quando o erro aprofundar a
+  saturação, permiti-la quando ajudar a sair da saturação e limitar o termo
+  integral à margem entre o comando nominal e os limites `[-1, +1]`.
 - **FI-RF-08:** Perfis de wow e flutter devem ser reproduzíveis com os mesmos
   parâmetros e semente.
+- **FI-RF-09:** Ativação, frequência e amplitude de wow e flutter devem ser
+  configuráveis durante a simulação dentro das faixas definidas no design.
+- **FI-RF-10:** Devem existir os presets demonstrativos `Wow`, `Flutter` e
+  `Combined`, além de uma ação para restaurar seus valores padrão.
+- **FI-RF-11:** Alterações em tempo de execução devem preservar a continuidade
+  de fase e aplicar transição suave de amplitude.
 - **TP-RF-08:** A interface deve mostrar o estado `Digital Tach OFF/ON`.
 - **TP-RF-09:** A comparação deve apresentar erro RMS, desvio máximo, overshoot
   e tempo em saturação.
+- **TP-RF-10:** A telemetria deve distinguir comando nominal, termos `P/I/D`,
+  `transfer_bias`, comandos solicitado e aplicado, saturação e bloqueio da
+  integral.
 - **SR-RF-06:** O processamento de áudio não deve bloquear o loop da interface.
+- **SR-RF-07:** Planta, perturbações, encoder e PID devem avançar com passo fixo
+  de `1 ms`, independentemente do intervalo de atualização da GUI.
+- **SR-RF-08:** O runtime deve acumular tempo monotônico, limitar a recuperação a
+  `100 ms` por atualização, sinalizar o descarte do excedente e excluí-lo das
+  métricas comparativas.
 
 ## Nova capacidade proposta: audio-playback
 
@@ -73,3 +103,67 @@ flutter devem atuar sobre a velocidade física da planta.
 - **Quando** o áudio é gerado;
 - **Então** sua taxa deve seguir a velocidade física resultante, e não o ruído
   de medição isoladamente.
+
+### ADT-CA-04: parametrização em tempo de execução
+
+- **Dado** um perfil ativo durante `PLAY`;
+- **Quando** frequência ou amplitude é alterada;
+- **Então** a nova configuração deve atuar imediatamente sobre a planta sem
+  reiniciar a fase ou introduzir um salto descontínuo.
+
+### ADT-CA-05: padrões restauráveis
+
+- **Dado** que os parâmetros foram alterados;
+- **Quando** `Restaurar padrão` é acionado;
+- **Então** wow deve retornar a `0,5 Hz` e `±1%`, e flutter a `8 Hz` e `±0,3%`.
+
+### ADT-CA-06: base comum da comparação
+
+- **Dado** a planta nominal em regime permanente, sem perturbação ou carga
+  adicional;
+- **Quando** `Digital Tach OFF` está ativo;
+- **Então** o comando nominal fixo deve sustentar o setpoint;
+- **E** ao ativar `ON`, a correção do PID deve ser somada à mesma base nominal.
+
+### ADT-CA-07: escala e saturação do atuador
+
+- **Dado** `plant_max_rpm = 3000` e setpoint de `1800 RPM`;
+- **Quando** o comando nominal é calculado;
+- **Então** ele deve ser `0,60`;
+- **E** qualquer comando total deve ser limitado ao intervalo `[-1, +1]`,
+  preservando separadamente os valores solicitado e aplicado para telemetria.
+
+### ADT-CA-08: núcleo desacoplado da interface
+
+- **Dado** um intervalo de GUI de `16 ms`;
+- **Quando** o runtime atualiza o núcleo;
+- **Então** devem ser executados dezesseis passos de `1 ms` antes da apresentação
+  do estado;
+- **E** um atraso superior a `100 ms` deve ser limitado e sinalizado sem
+  contaminar as métricas da demonstração.
+
+### ADT-CA-09: transferência OFF/ON sem salto
+
+- **Dado** `Digital Tach OFF` com erro de velocidade diferente de zero;
+- **Quando** `ON` é ativado;
+- **Então** o `transfer_bias` deve tornar a primeira correção zero e o comando
+  aplicado deve permanecer no valor nominal, inclusive com `Ki = 0`;
+- **E** a derivada não deve produzir pico pela troca ou por mudança de setpoint.
+
+### ADT-CA-10: saída suave do controle
+
+- **Dado** `Digital Tach ON` com correção PID diferente de zero;
+- **Quando** `OFF` é ativado;
+- **Então** o PID deve parar de reagir ao encoder e a correção deve chegar
+  linearmente a zero em `250 ms`;
+- **E** seus estados internos devem estar limpos ao final da rampa.
+
+### ADT-CA-11: anti-windup condicional
+
+- **Dado** o comando aplicado saturado no limite positivo;
+- **Quando** o erro positivo tenta aprofundar a saturação;
+- **Então** o termo integral deve permanecer inalterado;
+- **Mas**, quando o erro se torna negativo, a integração deve ser permitida para
+  ajudar o comando a sair da saturação;
+- **E** o termo integral nunca deve exceder a margem disponível em relação ao
+  comando nominal.

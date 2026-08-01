@@ -1,6 +1,12 @@
 # Tarefas: demonstração audível do servo digital
 
 - [ ] Resolver questões abertas e aprovar a change.
+- [x] Definir perfis, padrões e parametrização de wow e flutter.
+- [x] Definir o comando nominal usado em `Digital Tach OFF` e `ON`.
+- [x] Definir unidades, escala da planta e limites do atuador.
+- [x] Definir taxas e desacoplamento entre núcleo e interface.
+- [x] Definir as transições entre `Digital Tach OFF` e `ON`.
+- [x] Definir saturação, anti-windup e telemetria interna do PID.
 - [ ] [Separar planta, controlador, encoder e falhas](https://github.com/gut0leao/tapepilot-sim/issues/4).
 - [ ] [Modelar wow e flutter reproduzíveis](https://github.com/gut0leao/tapepilot-sim/issues/12).
 - [ ] [Modelar encoder e falhas de medição](https://github.com/gut0leao/tapepilot-sim/issues/5).

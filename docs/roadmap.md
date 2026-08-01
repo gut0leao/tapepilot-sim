@@ -27,7 +27,8 @@ OFF` e `ON`.
 - [ ] [Modelar distúrbios reproduzíveis de wow e flutter](https://github.com/gut0leao/tapepilot-sim/issues/12).
 - [ ] [Modelar encoder discreto e falhas de sinal](https://github.com/gut0leao/tapepilot-sim/issues/5).
 - [ ] [Implementar controlador PID ajustável](https://github.com/gut0leao/tapepilot-sim/issues/7).
-- [ ] Definir unidades, limites do atuador e taxas de amostragem.
+- [x] Definir unidades, limites do atuador e taxas de amostragem no design da
+  change do épico #10.
 
 ## 3. Demonstração audível
 
