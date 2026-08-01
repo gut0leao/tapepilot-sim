@@ -38,10 +38,14 @@ a velocidade física da planta.
 - **SC-RF-14:** O anti-windup deve usar integração condicional e limitar o termo
   integral à margem disponível do atuador.
 - **FI-RF-08:** Wow e flutter devem ser reproduzíveis.
-- **FI-RF-09:** Ativação, frequência e amplitude devem mudar em execução dentro
-  das faixas do design.
-- **FI-RF-10:** Devem existir presets `Wow`, `Flutter`, `Combined` e restauração
-  dos padrões.
+- **FI-RF-09:** Ativação, taxa característica e intensidade `Dry/Wet` devem
+  mudar em execução dentro das faixas do design.
+- **FI-RF-10:** Wow e flutter devem possuir controles independentes; seus sinais
+  devem ser somados quando ambos estiverem ativos, sem estado `Combined`.
+- **FI-RF-12:** `Restaurar padrão` deve desligar ambos e recuperar `0,5 Hz/1%`
+  para wow e `8 Hz/0,3%` para flutter.
+- **FI-RF-13:** Wow e flutter devem usar ruído filtrado dominante, envelope de
+  presença variável, periodicidade residual e sementes fixas independentes.
 - **FI-RF-11:** Alterações devem preservar fase e suavizar amplitude.
 - **TP-RF-10:** A telemetria deve distinguir nominal, `P/I/D`, `transfer_bias`,
   comandos solicitado/aplicado, saturação e bloqueio integral.
@@ -65,6 +69,22 @@ a velocidade física da planta.
 - **Quando** duas execuções são realizadas;
 - **Então** a planta deve receber a mesma perturbação;
 - **E** ajustes em execução devem preservar fase e suavizar amplitude.
+
+### DSF-CA-07: controles independentes
+
+- **Dado** wow desligado e flutter ligado;
+- **Quando** a simulação avança;
+- **Então** apenas flutter deve contribuir para a perturbação;
+- **E**, quando ambos estiverem ligados, a saída deve ser a soma dos dois sem
+  registrar um terceiro estado.
+
+### DSF-CA-08: irregularidade reproduzível
+
+- **Dado** os mesmos parâmetros, sementes e instante inicial;
+- **Quando** duas execuções usam os mesmos controles;
+- **Então** devem produzir amostras idênticas;
+- **E** wow e flutter devem usar sequências diferentes;
+- **E** o sinal não deve repetir a antiga senoide após um período característico.
 
 ### DSF-CA-03: base nominal
 

@@ -45,6 +45,10 @@ Use [`template.md`](template.md) para iniciar uma mudança.
 7. Atualizar documentação clássica e changelog.
 8. Mover o diretório para `archive/AAAA-MM-DD-<nome>/`.
 
+Se uma change possuir várias Issues, entregas individuais concluídas permanecem
+abertas em `Review`. Depois da validação integrada e do arquivamento, todas as
+Issues da change são fechadas e movidas juntas para `Done`.
+
 Correções que apenas restauram um requisito vigente podem dispensar proposta.
 
 ## Mudanças ativas

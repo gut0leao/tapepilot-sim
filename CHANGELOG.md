@@ -29,6 +29,10 @@ versão estável publicada.
 - Diagramas da documentação foram padronizados em Mermaid.
 - Estado, controlador proporcional, planta, falhas e encoder visual foram
   separados em módulos, preservando o comportamento do protótipo.
+- Scheduler fixo e perfis parametrizáveis de wow/flutter foram adicionados para
+  revisão dentro da change de fundamentos.
+- Ruído colorido, envelope variável e controles Dry/Wet foram adicionados às
+  perturbações de wow e flutter.
 
 ### Fixed
 

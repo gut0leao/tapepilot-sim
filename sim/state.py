@@ -16,6 +16,11 @@ class SimState:
 
     tape_friction: float = 0.0
     encoder_jitter: float = 0.0
+    wow_disturbance: float = 0.0
+    flutter_disturbance: float = 0.0
+    speed_disturbance: float = 0.0
+    runtime_lagged: bool = False
+    dropped_time_s: float = 0.0
 
     reel_l_deg: float = 0.0
     reel_r_deg: float = 0.0

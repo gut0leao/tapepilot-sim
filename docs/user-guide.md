@@ -39,6 +39,26 @@ heurística visual, sem unidade física.
 Adiciona ruído gaussiano à velocidade usada para animar as peças. Apesar do
 nome, ele ainda não altera a RPM realimentada, a telemetria ou o gráfico.
 
+### Wow e flutter
+
+Wow e flutter possuem ativação e sliders independentes. Ligar os
+dois apenas soma naturalmente seus efeitos; não existe um estado `Combined` a
+ser selecionado ou armazenado. `Restaurar padrão` desliga ambos e recupera:
+
+- wow em `0,5 Hz` e `1%`;
+- flutter em `8 Hz` e `0,3%`.
+
+`Taxa característica` controla a velocidade média das irregularidades.
+`Intensidade — Dry ↔ Wet` controla quanto cada perturbação afeta a planta. Os
+checkboxes funcionam como bypass, preservando as posições dos sliders.
+
+O sinal combina ruído filtrado dominante, presença variável e uma pequena
+periodicidade residual. Wow e flutter usam sequências distintas, mas
+reproduzíveis.
+
+Esses perfis modulam a velocidade física simulada e são valores demonstrativos,
+não medições de um equipamento real.
+
 ## Telemetria
 
 O painel mostra:
@@ -47,6 +67,7 @@ O painel mostra:
 - RPM simulada e setpoint;
 - PWM e erro;
 - níveis de atrito e jitter;
+- valores instantâneos de wow e flutter;
 - tensão simulada.
 
 O texto pode ser selecionado com o mouse.
@@ -71,7 +92,7 @@ apenas visuais e não representam relações mecânicas reais.
 
 ## Limitações de operação
 
-- Não há configuração de parâmetros pela interface além dos dois sliders.
+- Parâmetros avançados da planta e do controlador não estão na interface.
 - Não há persistência ou exportação de dados.
 - Não há pausa do relógio da simulação; `PAUSE` é um modo de baixa velocidade.
 - Não há indicação visual do botão atualmente selecionado.

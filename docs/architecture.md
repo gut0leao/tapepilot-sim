@@ -41,6 +41,7 @@ Permanece como fachada compatível, recebe comandos de transporte e coordena:
 - `FirstOrderPlant`, em `sim/plant.py`;
 - `FaultModel`, em `sim/faults.py`;
 - `VisualEncoder`, em `sim/encoder.py`;
+- `FixedStepScheduler`, em `sim/runtime.py`;
 - `SimState`, em `sim/state.py`.
 
 As fórmulas e o fluxo observável permanecem os mesmos do baseline. O encoder
@@ -80,7 +81,6 @@ Os caminhos dos assets são relativos à raiz do repositório.
 
 ## Limitações arquiteturais
 
-- A taxa da simulação está ligada à taxa de atualização da interface.
 - A fachada ainda coordena setpoints e movimento mecânico no mesmo passo.
 - O encoder extraído ainda representa somente a medição visual vigente.
 - Parâmetros estão fixos no código.
@@ -100,6 +100,7 @@ flowchart TD
     Sim --> Controller["controller.py — existente; evolução aprovada"]
     Sim --> Encoder["encoder.py — existente; evolução aprovada"]
     Sim --> Faults["faults.py — existente; evolução aprovada"]
+    Sim --> Runtime["runtime.py — existente"]
     Sim --> Metrics["metrics.py — planejado"]
     Root --> Audio["audio/"]
     Audio --> Source["source.py — planejado"]

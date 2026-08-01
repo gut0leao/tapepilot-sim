@@ -51,14 +51,29 @@ das métricas.
 
 ## Perturbações
 
-| Componente | Padrão | Frequência | Amplitude |
+| Componente | Padrão | Taxa característica | Intensidade Dry/Wet |
 |---|---:|---:|---:|
 | Wow | `0,5 Hz`, `±1%` | `0,1–2,0 Hz` | `0–3%` |
 | Flutter | `8 Hz`, `±0,3%` | `2–20 Hz` | `0–1%` |
 
-Os presets `Wow`, `Flutter` e `Combined` são demonstrativos. Parâmetros mudam em
-tempo de execução preservando fase; ativação e desativação usam rampa curta. A
-perturbação modula a efetividade do acionamento antes da dinâmica da planta.
+Wow e flutter possuem ativação, frequência e amplitude independentes. Quando
+ambos estão ativos, seus sinais são apenas somados; `Combined` não é estado nem
+preset. `Restaurar padrão` desliga ambos e recupera os valores da tabela.
+Parâmetros mudam em execução preservando a fase residual, e intensidade usa
+rampa de `100 ms`.
+A perturbação modula a efetividade do acionamento antes da dinâmica da planta.
+
+Cada componente mistura ruído filtrado, envelope lento e uma senoide residual:
+
+| Componente | Ruído | Senoide | Semente | Envelope |
+|---|---:|---:|---:|---:|
+| Wow | `85%` | `15%` | `1103` | `2 s` |
+| Flutter | `90%` | `10%` | `2207` | `500 ms` |
+
+O ruído escolhe novos alvos a cada meio período característico e os suaviza por
+`período / 2π`. O envelope usa outra sequência, com semente consecutiva, e varia
+a presença entre aproximadamente `30%` e `100%`. A taxa em hertz controla a
+velocidade média das irregularidades, não uma senoide exata.
 
 ## PID e transições
 

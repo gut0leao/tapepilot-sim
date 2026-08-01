@@ -15,6 +15,7 @@ sem efeito observável.
 | `sim/plant.py` | Resposta de primeira ordem vigente | `speed-control` | `tests/test_components.py` |
 | `sim/faults.py` | Carga de atrito e indicador de tensão vigentes | `fault-injection` | `tests/test_components.py` |
 | `sim/encoder.py` | Jitter aplicado à medição visual vigente | `fault-injection` | `tests/test_components.py` |
+| `sim/runtime.py` | Conversão de tempo real em passos fixos limitados | change `digital-servo-foundations` | `tests/test_components.py` |
 | `sim/__init__.py` | API pública de `SimState` e `Simulator` | `simulation-runtime` | importação pelos testes |
 | `assets/svg/*.svg` | Bobinas e capstan da cena | `mechanics-visualization` | carregamento visual manual |
 | `tests/test_simulator.py` | Caracterização do modelo atual | `development.md` | `unittest` e `pytest` |
@@ -49,6 +50,8 @@ sem efeito observável.
 | Carga equivalente de atrito | `FI-RF-03`, `FI-RF-04` | `test_friction_reduces_speed_and_produces_tension` |
 | Indicador de tensão sem unidade | `FI-RF-05` | teste de atrito |
 | Jitter gaussiano somente visual | `FI-RF-06`, `FI-RF-07` | `test_encoder_preserves_visual_jitter` |
+| Wow e flutter naturais, parametrizáveis e reproduzíveis | change `digital-servo-foundations` (`FI-RF-08` a `FI-RF-13`) | testes de perturbação em `test_components.py` |
+| Scheduler de 1 ms com recuperação limitada | change `digital-servo-foundations` (`SR-RF-07`, `SR-RF-08`) | testes do scheduler em `test_components.py` |
 | Movimento angular proporcional | `MV-RF-06` | `test_angles_advance_in_current_positive_direction` |
 | Normalização angular em 360 graus | `MV-RF-07` | ainda não coberto |
 | Convergência de `STOP` para zero | `SC-RF-05` | `test_stop_converges_toward_zero` |

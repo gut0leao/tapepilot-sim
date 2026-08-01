@@ -91,6 +91,12 @@ decomposição técnica. A mesma checklist não deve ser copiada para os dois lo
 Durante a execução, o item percorre `In Progress` e `Review`. Trabalho não
 concluído volta ao backlog ou à sprint seguinte de forma explícita.
 
+Quando uma change reúne várias Issues dependentes, cada entrega implementada e
+validada permanece aberta em `Review`. As Issues só são fechadas e movidas em
+conjunto para `Done` depois da revisão integrada, incorporação do delta às specs
+vigentes e arquivamento da change. Uma Issue em `Review` pode liberar a próxima
+dependência quando sua implementação e seus testes já estiverem disponíveis.
+
 ## 6. Conclusão
 
 Uma Issue pode ir para `Done` quando a

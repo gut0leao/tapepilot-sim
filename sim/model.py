@@ -11,6 +11,7 @@ from .controller import ProportionalController
 from .encoder import VisualEncoder
 from .faults import FaultModel
 from .plant import FirstOrderPlant
+from .runtime import FixedStepScheduler
 from .state import SimState
 
 
@@ -23,6 +24,7 @@ class Simulator:
         self.plant = FirstOrderPlant()
         self.faults = FaultModel()
         self.encoder = VisualEncoder()
+        self.scheduler = FixedStepScheduler()
 
     @property
     def Kp(self):
@@ -45,6 +47,15 @@ class Simulator:
     def set_transport(self, mode: str):
         self.s.transport = mode
 
+    def advance(self, elapsed: float):
+        """Avança o núcleo em passos fixos a partir do tempo real transcorrido."""
+        steps, dropped = self.scheduler.consume(elapsed)
+        self.s.runtime_lagged = dropped > 0.0
+        self.s.dropped_time_s = dropped
+        for _ in range(steps):
+            self.step(self.scheduler.step_seconds)
+        return self.s
+
     def step(self, dt: float):
         if self.s.transport == "PLAY":
             self.s.rpm_setpoint = 1800.0
@@ -63,6 +74,12 @@ class Simulator:
             self.s.pwm,
             self.s.tape_friction,
         )
+        (
+            target,
+            self.s.wow_disturbance,
+            self.s.flutter_disturbance,
+            self.s.speed_disturbance,
+        ) = self.faults.apply_speed_disturbance(target, dt)
         self.s.rpm = self.plant.advance(self.s.rpm, target, dt)
 
         rpm_for_visual = self.encoder.measured_rpm(
