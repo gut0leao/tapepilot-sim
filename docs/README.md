@@ -80,5 +80,11 @@ Diagramas de fluxo, componentes, estados, sequência e hierarquia devem usar
 `mermaid`. Blocos `text` permanecem reservados para fórmulas, formatos literais
 e exemplos que não representam relações visuais.
 
+O GitHub renderiza esses diagramas automaticamente ao exibir os arquivos
+Markdown. Para visualizá-los localmente, use um editor ou preview Markdown com
+suporte a Mermaid; sem esse suporte, será exibido apenas o código-fonte do
+diagrama. Mermaid é uma dependência da visualização da documentação, não da
+execução ou dos testes do simulador.
+
 Documente somente o necessário para definir comportamento, decisão, validação
 ou contexto duradouro. Detalhes evidentes no código não precisam ser repetidos.
