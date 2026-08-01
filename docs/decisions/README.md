@@ -22,3 +22,4 @@ mudar, crie um novo ADR e marque o anterior como substituído.
 
 - [ADR 0001 — Processo híbrido de documentação](0001-processo-hibrido-de-documentacao.md)
 - [ADR 0002 — Specs vivas e deltas de mudança](0002-specs-vivas-e-deltas-de-mudanca.md)
+- [ADR 0003 — Áudio como evidência do servo digital](0003-audio-como-evidencia-do-servo-digital.md)

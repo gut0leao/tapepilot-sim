@@ -49,8 +49,9 @@ decisões versionadas no repositório.
 
 O [Project `tapepilot-sim`](https://github.com/users/gut0leao/projects/2), número
 2, foi configurado em 2026-07-31 com os cinco estados e os campos `Priority` e
-`Sprint` descritos acima. O valor inicial de sprint é `Unscheduled`; `Sprint 1`
-está disponível para o primeiro ciclo.
+`Sprint` descritos acima. `Sprint 1` foi concluída com a publicação da base
+spec-driven. Não há sprint ativa; novos itens permanecem `Unscheduled` até
+satisfazerem a Definition of Ready.
 
 ## 4. Changes e Definition of Ready
 

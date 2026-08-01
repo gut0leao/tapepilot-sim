@@ -77,7 +77,8 @@ Os caminhos dos assets são relativos à raiz do repositório.
 
 ## Direção desejada
 
-A evolução pretendida separa domínio e apresentação:
+A evolução pretendida separa planta, controle, sensor, perturbações, áudio e
+apresentação:
 
 ```text
 app.py
@@ -87,7 +88,11 @@ sim/
 ├── plant.py          # planejado
 ├── controller.py     # planejado
 ├── encoder.py        # planejado
-└── faults.py         # planejado
+├── faults.py         # planejado
+└── metrics.py        # planejado
+audio/
+├── source.py         # planejado
+└── playback.py       # planejado
 ui/
 ├── main_window.py      # planejado
 ├── mechanics_scene.py  # planejado
@@ -117,3 +122,24 @@ flowchart LR
     UI --> Scene[Cena SVG]
     UI --> Plots[Gráficos e telemetria]
 ```
+
+## Arquitetura-alvo do servo digital
+
+```mermaid
+flowchart LR
+    Setpoint --> Selector{Digital Tach}
+    Selector -->|OFF| Nominal[Comando nominal]
+    Selector -->|ON| PID[PID]
+    Nominal --> Actuator[Atuador]
+    PID --> Actuator
+    Actuator --> Plant[Planta física]
+    Disturbance[Wow / flutter / carga] --> Plant
+    Plant --> Speed[Velocidade física]
+    Speed --> Encoder[Encoder]
+    Encoder --> PID
+    Speed --> Audio[Reprodução variável]
+    Speed --> Telemetry[Métricas e gráficos]
+```
+
+O áudio consome a velocidade física. Ruído do encoder só pode afetá-lo
+indiretamente pela reação do controlador sobre a planta.

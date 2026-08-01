@@ -14,10 +14,11 @@ Como funciona hoje     Como queremos mudar    Como e por que mudou
 Para conhecer o projeto:
 
 1. Leia o [README principal](../README.md).
-2. Consulte o [guia de uso](user-guide.md).
-3. Veja a [arquitetura](architecture.md) e o
+2. Entenda a [visão do produto](product-vision.md).
+3. Consulte o [guia de uso](user-guide.md).
+4. Veja a [arquitetura](architecture.md) e o
    [modelo da simulação](simulation-model.md).
-4. Use o [inventário](implementation-inventory.md) para relacionar requisitos,
+5. Use o [inventário](implementation-inventory.md) para relacionar requisitos,
    código e testes.
 
 ## Comportamento vigente — AS-IS
@@ -48,6 +49,7 @@ change é movida para `changes/archive/`.
 ## Outros documentos
 
 - [Roadmap](roadmap.md): ideias futuras ainda sem compromisso de implementação.
+- [Visão do produto](product-vision.md): problema, valor e caminho até hardware.
 - [Gestão do projeto](project-management.md): backlog, Project, sprints e fluxo
   de trabalho.
 - [ADRs](decisions/README.md): decisões técnicas duradouras e suas razões.

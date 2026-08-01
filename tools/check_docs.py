@@ -101,6 +101,13 @@ def check_specs():
 
 def check_changes():
     errors = []
+    current_requirement_ids = set()
+    for spec_path in sorted((ROOT / "docs/specs").glob("*/spec.md")):
+        spec_text = spec_path.read_text(encoding="utf-8")
+        current_requirement_ids.update(
+            re.findall(r"\*\*([A-Z]{2}-(?:RF|RNF)-\d{2}):\*\*", spec_text)
+        )
+    added_requirement_locations = {}
     for path in sorted((ROOT / "docs/changes").glob("*/proposal.md")):
         text = path.read_text(encoding="utf-8")
         for section in REQUIRED_CHANGE_SECTIONS:
@@ -118,6 +125,33 @@ def check_changes():
                 errors.append(
                     f"{path.relative_to(ROOT)}: arquivo obrigatório ausente: {companion}"
                 )
+        delta_path = path.parent / "spec-delta.md"
+        if delta_path.exists():
+            delta_text = delta_path.read_text(encoding="utf-8")
+            match = re.search(
+                r"^## Requisitos adicionados\s*$([\s\S]*?)(?=^## |\Z)",
+                delta_text,
+                re.MULTILINE,
+            )
+            if match:
+                for requirement_id in re.findall(
+                    r"\*\*([A-Z]{2}-(?:RF|RNF)-\d{2}):\*\*", match.group(1)
+                ):
+                    added_requirement_locations.setdefault(requirement_id, []).append(
+                        delta_path
+                    )
+    for requirement_id, paths in added_requirement_locations.items():
+        if requirement_id in current_requirement_ids:
+            locations = ", ".join(str(path.relative_to(ROOT)) for path in paths)
+            errors.append(
+                f"requisito futuro já existe nas specs vigentes {requirement_id}: "
+                f"{locations}"
+            )
+        if len(paths) > 1:
+            locations = ", ".join(str(path.relative_to(ROOT)) for path in paths)
+            errors.append(
+                f"requisito futuro duplicado {requirement_id}: {locations}"
+            )
     return errors
 
 

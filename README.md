@@ -1,13 +1,17 @@
 # TapePilot Simulator
 
-O TapePilot é um simulador visual e interativo de mecanismos de transporte de
-fita. O projeto serve como bancada experimental para estudar controle de
-velocidade, resposta mecânica e injeção de falhas antes de levar a lógica para
-hardware embarcado.
+O TapePilot é um simulador visual e interativo para desenvolver e demonstrar um
+controlador digital de velocidade de capstan. O objetivo é comparar uma planta
+de transporte de fita com o controle digital desligado e ligado, antes de levar
+a estratégia para um controlador embarcado.
 
 > **Estado:** protótipo experimental. O modelo atual demonstra o ciclo de
 > controle e a interface; ele ainda não representa com precisão um mecanismo
 > real.
+
+A direção do produto inclui tornar wow e flutter audíveis por meio de uma
+amostra cuja reprodução acompanhe a velocidade física simulada. Essa capacidade
+ainda não está implementada. Consulte a [visão do produto](docs/product-vision.md).
 
 ## O que já funciona
 
@@ -79,6 +83,7 @@ tapepilot-sim/
 ## Documentação
 
 - [Guia da documentação](docs/README.md)
+- [Visão do produto](docs/product-vision.md)
 - [Arquitetura](docs/architecture.md)
 - [Ambiente de desenvolvimento](docs/development.md)
 - [Guia de uso](docs/user-guide.md)

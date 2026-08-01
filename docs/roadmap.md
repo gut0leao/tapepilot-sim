@@ -1,67 +1,61 @@
 # Roadmap
 
-O roadmap registra direção e prioridade, não datas prometidas. Os itens marcados
-como concluídos descrevem o protótipo atual.
+O roadmap registra a sequência estratégica, não datas, prioridade operacional
+ou compromisso de sprint. Esses dados permanecem no GitHub Project.
 
-Itens já promovidos ao product backlog possuem link para a Issue correspondente.
-Prioridade, sprint e status são mantidos somente no GitHub Project.
+## Resultado central
 
-## 1. Protótipo visual
+[Épico #10 — Demonstrar estabilização audível do servo digital](https://github.com/gut0leao/tapepilot-sim/issues/10).
 
-- [x] Janela Qt
-- [x] Botões de transporte
-- [x] Animação com SVGs
-- [x] Modelo de primeira ordem
-- [x] Controle proporcional
-- [x] Gráficos em tempo real
-- [x] Sliders de atrito e jitter
-- [x] Escala explícita dos SVGs
+Demonstrar que um controlador digital reduz variações físicas da fita por meio
+de áudio, gráficos e métricas, comparando a mesma perturbação com `Digital Tach
+OFF` e `ON`.
 
-## 2. Base testável
+## 1. Baseline concluído
 
-- [x] Declarar dependências em arquivo versionado
-- [x] Separar o núcleo da simulação da interface
-- [x] Criar testes de caracterização do modelo
-- [x] Adotar relógio monotônico
-- [ ] Definir unidades e faixas dos parâmetros
-- [ ] [Implementar o sentido reverso de `REW`](https://github.com/gut0leao/tapepilot-sim/issues/9)
-- [ ] [Tornar caminhos dos assets independentes do diretório de execução](https://github.com/gut0leao/tapepilot-sim/issues/6)
-- [ ] [Ampliar testes da interface e do runtime](https://github.com/gut0leao/tapepilot-sim/issues/8)
+- [x] Interface Qt e controles de transporte.
+- [x] Animação em SVG.
+- [x] Modelo qualitativo de primeira ordem.
+- [x] Controle proporcional.
+- [x] Gráficos e falhas demonstrativas.
+- [x] Núcleo testável sem Qt.
+- [x] Specs vivas, changes, Issues e Project.
 
-## 3. Controle de velocidade
+## 2. Fundamentos do servo digital
 
-- [ ] [Separar planta, controlador, encoder e falhas](https://github.com/gut0leao/tapepilot-sim/issues/4)
-- [ ] [Implementar PID](https://github.com/gut0leao/tapepilot-sim/issues/7)
-- [ ] Permitir ajuste de `Kp`, `Ki` e `Kd`
-- [ ] Medir overshoot e tempo de acomodação
-- [ ] Modelar saturação do atuador
+- [ ] [Separar planta, controlador, encoder e falhas](https://github.com/gut0leao/tapepilot-sim/issues/4).
+- [ ] [Modelar distúrbios reproduzíveis de wow e flutter](https://github.com/gut0leao/tapepilot-sim/issues/12).
+- [ ] [Modelar encoder discreto e falhas de sinal](https://github.com/gut0leao/tapepilot-sim/issues/5).
+- [ ] [Implementar controlador PID ajustável](https://github.com/gut0leao/tapepilot-sim/issues/7).
+- [ ] Definir unidades, limites do atuador e taxas de amostragem.
 
-## 4. Encoder e falhas
+## 3. Demonstração audível
 
-- [ ] [Modelar encoder discreto e falhas de sinal](https://github.com/gut0leao/tapepilot-sim/issues/5)
-- [ ] Aplicar ruído à medição realimentada
-- [ ] Simular perda de pulsos e dropout
-- [ ] Simular escorregamento da fita
+- [ ] [Tornar caminhos dos assets independentes da execução](https://github.com/gut0leao/tapepilot-sim/issues/6).
+- [ ] [Reproduzir áudio conforme a velocidade física da fita](https://github.com/gut0leao/tapepilot-sim/issues/11).
+- [ ] [Adicionar comparação Digital Tach OFF/ON e métricas](https://github.com/gut0leao/tapepilot-sim/issues/13).
+- [ ] Validar com amostras sustentadas de voz ou cordas.
+- [ ] Comparar execuções com a mesma perturbação.
 
-## 5. Modelo mecânico
+## 4. Qualidade e manutenção do simulador
 
-Backlog: [Issue #3](https://github.com/gut0leao/tapepilot-sim/issues/3).
+- [ ] [Ampliar testes da interface e do runtime](https://github.com/gut0leao/tapepilot-sim/issues/8).
+- [ ] [Implementar o sentido reverso de `REW`](https://github.com/gut0leao/tapepilot-sim/issues/9).
 
-- [ ] Modelar raio variável das bobinas
-- [ ] Modelar inércia rotacional
-- [ ] Modelar back-tension
-- [ ] Acoplar tensão, bobinas e capstan
-- [ ] Validar parâmetros com medições reais
+## 5. Fidelidade e validação física
 
-## 6. Integração com hardware
+- [ ] [Evoluir o modelo mecânico de fita e bobinas](https://github.com/gut0leao/tapepilot-sim/issues/3).
+- [ ] Caracterizar sensor, motor, atuador, inércia e cargas de um mecanismo real.
+- [ ] Ajustar a planta simulada com dados medidos.
+- [ ] Comparar resposta simulada e resposta real.
 
-Backlog: [Issue #2](https://github.com/gut0leao/tapepilot-sim/issues/2).
+## 6. Controlador embarcado
 
-- [ ] Definir interface de comunicação
-- [ ] Exportar parâmetros do controlador
-- [ ] Reproduzir entradas registradas em hardware
-- [ ] Comparar simulação e medições reais
+- [ ] [Preparar integração com hardware embarcado](https://github.com/gut0leao/tapepilot-sim/issues/2).
+- [ ] Definir requisitos elétricos, temporais e de segurança.
+- [ ] Escolher a plataforma somente depois desses requisitos.
+- [ ] Exportar e validar o controlador no hardware.
+- [ ] Avaliar compatibilidade com equipamentos alvo.
 
-Antes de implementar um item que altere comportamento, deve-se aprovar sua
-proposta e delta em `docs/changes/`. Depois da validação, o delta é incorporado
-às specs vigentes.
+Antes de implementar comportamento novo, deve-se aprovar sua change. Depois da
+validação, o delta é incorporado às specs vigentes e a change é arquivada.

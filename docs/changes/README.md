@@ -51,6 +51,7 @@ Correções que apenas restauram um requisito vigente podem dispensar proposta.
 
 | Mudança | Estado | Specs afetadas |
 |---|---|---|
+| [Demonstração audível do servo digital](audible-digital-tach-demo/proposal.md) | `Draft` | cinco capacidades vigentes e nova `audio-playback` |
 | [Transporte reverso](reverse-transport/proposal.md) | `Draft` | `transport-modes`, `speed-control`, `mechanics-visualization`, `telemetry-and-plots` |
 
 ## Arquivo

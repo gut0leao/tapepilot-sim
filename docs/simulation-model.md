@@ -128,6 +128,12 @@ zero.
 - A tensão é apenas um indicador.
 - A direção reversa ainda não existe.
 - Os parâmetros não foram calibrados com dados experimentais.
+- O controlador proporcional está sempre ativo; não existe comparação OFF/ON.
+- Não existem perfis físicos de wow e flutter.
+- Não há reprodução de áudio ligada à velocidade da fita.
+
+A evolução para demonstração audível está proposta em
+`docs/changes/audible-digital-tach-demo/`.
 
 Qualquer mudança nas equações ou no significado das variáveis deve começar por
 um delta aprovado e, ao ser concluída, atualizar este documento e as specs

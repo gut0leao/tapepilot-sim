@@ -18,6 +18,8 @@ versão estável publicada.
 - Specs vivas por capacidade e processo de mudanças baseado em deltas.
 - Guia mínimo para backlog, GitHub Project e sprints.
 - GitHub Project configurado e backlog inicial criado a partir do roadmap.
+- Visão de produto orientada à demonstração audível do servo digital.
+- Change e épico para comparação Digital Tach OFF/ON.
 
 ### Changed
 
