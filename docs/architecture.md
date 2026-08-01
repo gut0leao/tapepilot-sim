@@ -8,6 +8,10 @@ da interface. A janela está em `app.py`; estado e modelo estão em `sim/`.
 ```mermaid
 flowchart LR
     Controls[Controles da UI] --> Simulator
+    Simulator --> Controller[ProportionalController]
+    Simulator --> Plant[FirstOrderPlant]
+    Simulator --> Faults[FaultModel]
+    Simulator --> Encoder[VisualEncoder]
     Simulator --> SimState
     SimState --> Telemetry[Telemetria e gráficos]
     Simulator --> Animation[Animação dos SVGs]
@@ -31,14 +35,17 @@ arquitetural do projeto.
 
 ### `sim.Simulator`
 
-Recebe comandos de transporte e executa um passo da simulação. Atualmente ele:
+Permanece como fachada compatível, recebe comandos de transporte e coordena:
 
-1. escolhe o setpoint do modo;
-2. calcula o erro e o comando proporcional;
-3. aplica a carga equivalente ao atrito;
-4. atualiza a RPM por uma resposta de primeira ordem;
-5. adiciona jitter à velocidade usada na animação;
-6. atualiza os ângulos dos elementos mecânicos.
+- `ProportionalController`, em `sim/controller.py`;
+- `FirstOrderPlant`, em `sim/plant.py`;
+- `FaultModel`, em `sim/faults.py`;
+- `VisualEncoder`, em `sim/encoder.py`;
+- `SimState`, em `sim/state.py`.
+
+As fórmulas e o fluxo observável permanecem os mesmos do baseline. O encoder
+ainda produz apenas jitter visual; seu modelo discreto pertence à evolução
+aprovada, não ao estado atual.
 
 ### `MainWindow`
 
@@ -74,7 +81,8 @@ Os caminhos dos assets são relativos à raiz do repositório.
 ## Limitações arquiteturais
 
 - A taxa da simulação está ligada à taxa de atualização da interface.
-- Controlador, planta, sensor e falhas não possuem interfaces independentes.
+- A fachada ainda coordena setpoints e movimento mecânico no mesmo passo.
+- O encoder extraído ainda representa somente a medição visual vigente.
 - Parâmetros estão fixos no código.
 
 ## Direção desejada
@@ -87,11 +95,11 @@ flowchart TD
     Root["tapepilot-sim/"] --> App["app.py — existente"]
     Root --> Sim["sim/"]
     Sim --> Model["model.py — existente; decomposição gradual"]
-    Sim --> State["state.py — planejado"]
-    Sim --> Plant["plant.py — planejado"]
-    Sim --> Controller["controller.py — planejado"]
-    Sim --> Encoder["encoder.py — planejado"]
-    Sim --> Faults["faults.py — planejado"]
+    Sim --> State["state.py — existente"]
+    Sim --> Plant["plant.py — existente; evolução aprovada"]
+    Sim --> Controller["controller.py — existente; evolução aprovada"]
+    Sim --> Encoder["encoder.py — existente; evolução aprovada"]
+    Sim --> Faults["faults.py — existente; evolução aprovada"]
     Sim --> Metrics["metrics.py — planejado"]
     Root --> Audio["audio/"]
     Audio --> Source["source.py — planejado"]
@@ -120,7 +128,11 @@ novo ADR.
 flowchart LR
     Operator[Operador] --> UI[MainWindow / Qt]
     UI --> Simulator[sim.Simulator]
-    Simulator --> State[sim.SimState]
+    Simulator --> Controller[sim.controller]
+    Simulator --> Plant[sim.plant]
+    Simulator --> Faults[sim.faults]
+    Simulator --> Encoder[sim.encoder]
+    Simulator --> State[sim.state]
     State --> UI
     UI --> Scene[Cena SVG]
     UI --> Plots[Gráficos e telemetria]

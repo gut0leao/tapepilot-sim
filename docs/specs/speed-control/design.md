@@ -1,9 +1,9 @@
 # Design: controle de velocidade
 
-O protótipo usa um controlador proporcional dentro de `Simulator.step()`. A
-planta é uma interpolação de primeira ordem dependente do `dt` medido. Controle
-e planta permanecem no mesmo módulo, mas não dependem de Qt.
+O protótipo usa `ProportionalController`, em `sim/controller.py`, e
+`FirstOrderPlant`, em `sim/plant.py`. `Simulator.step()` permanece como fachada,
+calcula o erro e coordena os dois componentes. Nenhum deles depende de Qt.
 
-A separação futura em `controller.py` e `plant.py` deve preservar estes
-requisitos ou ser precedida por um delta aprovado.
-
+A extração preserva o controle proporcional e a interpolação de primeira ordem
+vigentes. A evolução para atuador efetivo e PID está aprovada na change
+`digital-servo-foundations`, mas ainda não representa o AS-IS.

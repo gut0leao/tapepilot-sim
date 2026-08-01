@@ -27,6 +27,8 @@ versão estável publicada.
 - SVGs recebem dimensões visuais explícitas.
 - GitHub Actions oficiais atualizadas para versões baseadas em Node.js 24.
 - Diagramas da documentação foram padronizados em Mermaid.
+- Estado, controlador proporcional, planta, falhas e encoder visual foram
+  separados em módulos, preservando o comportamento do protótipo.
 
 ### Fixed
 

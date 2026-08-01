@@ -6,27 +6,12 @@ e reutilizado separadamente da interface.
 """
 
 import math
-import random
-from dataclasses import dataclass
 
-
-@dataclass
-class SimState:
-    """Estado instantâneo da simulação."""
-
-    transport: str = "STOP"
-    rpm_setpoint: float = 0.0
-    rpm: float = 0.0
-    pwm: float = 0.0
-    err: float = 0.0
-    tension: float = 0.0
-
-    tape_friction: float = 0.0
-    encoder_jitter: float = 0.0
-
-    reel_l_deg: float = 0.0
-    reel_r_deg: float = 0.0
-    capstan_deg: float = 0.0
+from .controller import ProportionalController
+from .encoder import VisualEncoder
+from .faults import FaultModel
+from .plant import FirstOrderPlant
+from .state import SimState
 
 
 class Simulator:
@@ -34,8 +19,28 @@ class Simulator:
 
     def __init__(self):
         self.s = SimState()
-        self.Kp = 0.02
-        self.tau = 0.25
+        self.controller = ProportionalController()
+        self.plant = FirstOrderPlant()
+        self.faults = FaultModel()
+        self.encoder = VisualEncoder()
+
+    @property
+    def Kp(self):
+        """Mantém compatibilidade com o atributo público do protótipo."""
+        return self.controller.kp
+
+    @Kp.setter
+    def Kp(self, value):
+        self.controller.kp = value
+
+    @property
+    def tau(self):
+        """Mantém compatibilidade com o atributo público do protótipo."""
+        return self.plant.tau
+
+    @tau.setter
+    def tau(self, value):
+        self.plant.tau = value
 
     def set_transport(self, mode: str):
         self.s.transport = mode
@@ -51,21 +56,18 @@ class Simulator:
             self.s.rpm_setpoint = 0.0
 
         self.s.err = self.s.rpm_setpoint - self.s.rpm
-        self.s.pwm = max(min(self.Kp * self.s.err, 1.0), -1.0)
+        self.s.pwm = self.controller.command(self.s.err)
 
-        friction_load = self.s.tape_friction * 600.0
-        self.s.tension = self.s.tape_friction * (
-            0.3 + 0.7 * abs(self.s.pwm)
+        target, self.s.tension = self.faults.apply_friction(
+            self.s.rpm_setpoint,
+            self.s.pwm,
+            self.s.tape_friction,
         )
+        self.s.rpm = self.plant.advance(self.s.rpm, target, dt)
 
-        target = self.s.rpm_setpoint - friction_load * abs(self.s.pwm)
-        target = max(target, 0.0)
-
-        alpha = dt / (self.tau + dt)
-        self.s.rpm = (1 - alpha) * self.s.rpm + alpha * target
-
-        jitter = random.gauss(0.0, 1.0) * self.s.encoder_jitter * 20.0
-        rpm_for_visual = max(self.s.rpm + jitter, 0.0)
+        rpm_for_visual = self.encoder.measured_rpm(
+            self.s.rpm, self.s.encoder_jitter
+        )
         omega = (rpm_for_visual * 2 * math.pi) / 60.0
 
         self.s.capstan_deg = (

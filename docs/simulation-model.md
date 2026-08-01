@@ -6,6 +6,11 @@ O modelo atual existe para demonstrar o loop de controle e sua visualização. E
 é qualitativo: os valores não foram identificados a partir de um mecanismo real
 e não devem ser usados como previsões físicas.
 
+`Simulator`, em `sim/model.py`, coordena componentes separados para estado,
+controle proporcional, planta de primeira ordem, falhas e medição visual. Essa
+separação preserva as equações descritas abaixo; os novos modelos aprovados ainda
+não estão ativos.
+
 ## Estado
 
 As variáveis principais são:
@@ -132,7 +137,8 @@ zero.
 - Não existem perfis físicos de wow e flutter.
 - Não há reprodução de áudio ligada à velocidade da fita.
 
-A evolução para demonstração audível está proposta em
+A evolução do núcleo está aprovada em
+`docs/changes/digital-servo-foundations/`. A demonstração de áudio permanece em
 `docs/changes/audible-digital-tach-demo/`.
 
 Qualquer mudança nas equações ou no significado das variáveis deve começar por

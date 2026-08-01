@@ -9,10 +9,16 @@ sem efeito observável.
 | Artefato | Responsabilidade | Contrato vigente | Validação |
 |---|---|---|---|
 | `app.py` | Inicialização, janela Qt, controles, telemetria, cena e gráficos | `simulation-runtime`, `transport-modes`, `mechanics-visualization`, `telemetry-and-plots` | compilação; validação visual manual |
-| `sim/model.py` | Estado, controle proporcional, dinâmica, falhas e ângulos | `speed-control`, `fault-injection`, `transport-modes`, `mechanics-visualization` | `tests/test_simulator.py` |
+| `sim/model.py` | Fachada e coordenação do passo, transporte e ângulos | `speed-control`, `fault-injection`, `transport-modes`, `mechanics-visualization` | `tests/test_simulator.py` |
+| `sim/state.py` | Estado instantâneo compartilhado | `simulation-runtime` | importação e testes do simulador |
+| `sim/controller.py` | Controle proporcional e saturação vigentes | `speed-control` | `tests/test_components.py` |
+| `sim/plant.py` | Resposta de primeira ordem vigente | `speed-control` | `tests/test_components.py` |
+| `sim/faults.py` | Carga de atrito e indicador de tensão vigentes | `fault-injection` | `tests/test_components.py` |
+| `sim/encoder.py` | Jitter aplicado à medição visual vigente | `fault-injection` | `tests/test_components.py` |
 | `sim/__init__.py` | API pública de `SimState` e `Simulator` | `simulation-runtime` | importação pelos testes |
 | `assets/svg/*.svg` | Bobinas e capstan da cena | `mechanics-visualization` | carregamento visual manual |
 | `tests/test_simulator.py` | Caracterização do modelo atual | `development.md` | `unittest` e `pytest` |
+| `tests/test_components.py` | Contratos dos componentes extraídos | change `digital-servo-foundations` | `unittest` e `pytest` |
 | `tools/check_docs.py` | Links e estrutura documental | `simulation-runtime`, `development.md` | execução local e CI |
 | `.github/workflows/quality.yml` | Validação contínua | `simulation-runtime` | GitHub Actions |
 | `pyproject.toml` | Metadados, dependências e configuração de testes | `simulation-runtime`, `development.md` | instalação do pacote |
@@ -42,7 +48,7 @@ sem efeito observável.
 | Resposta de primeira ordem | `SC-RF-04` | `test_first_order_response_uses_elapsed_time` |
 | Carga equivalente de atrito | `FI-RF-03`, `FI-RF-04` | `test_friction_reduces_speed_and_produces_tension` |
 | Indicador de tensão sem unidade | `FI-RF-05` | teste de atrito |
-| Jitter gaussiano somente visual | `FI-RF-06`, `FI-RF-07` | ainda não coberto |
+| Jitter gaussiano somente visual | `FI-RF-06`, `FI-RF-07` | `test_encoder_preserves_visual_jitter` |
 | Movimento angular proporcional | `MV-RF-06` | `test_angles_advance_in_current_positive_direction` |
 | Normalização angular em 360 graus | `MV-RF-07` | ainda não coberto |
 | Convergência de `STOP` para zero | `SC-RF-05` | `test_stop_converges_toward_zero` |
@@ -55,7 +61,6 @@ automatizado. Permanecem dependentes de teste manual ou sem teste dedicado:
 - construção e interação da janela Qt;
 - carregamento, posição e rotação visual dos SVGs;
 - atualização e descarte dos buffers dos gráficos;
-- efeito estatístico do jitter;
 - fallback de modos desconhecidos;
 - normalização angular após múltiplas voltas.
 
