@@ -46,8 +46,9 @@ ser revistos depois de medições em hardware real.
 
 - **Código:** componentes extraídos em `sim/state.py`, `controller.py`,
   `plant.py`, `faults.py` e `encoder.py`; novos modelos ainda pendentes.
-- **Testes:** dez testes passam, incluindo quatro contratos dos componentes.
+- **Testes:** dez testes passam, incluindo quatro contratos dos componentes;
+  workflow [Quality 30703602470](https://github.com/gut0leao/tapepilot-sim/actions/runs/30703602470) aprovado.
 - **Validação manual:** interface testada pelo mantenedor em 2026-08-01, sem
   regressões aparentes após a extração dos componentes.
-- **Commit/PR:** pendente para a extração da Issue #4.
+- **Commit/PR:** commit `6e58f98` implementa a extração da Issue #4.
 - **Limitações remanescentes:** parâmetros ainda não identificados fisicamente.
