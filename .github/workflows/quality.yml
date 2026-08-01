@@ -1,0 +1,25 @@
+name: Quality
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check documentation
+        run: python3 tools/check_docs.py
+
+      - name: Run characterization tests
+        run: python3 -m unittest discover -v
+
+      - name: Compile Python sources
+        run: python3 -m py_compile app.py sim/*.py tests/*.py tools/*.py

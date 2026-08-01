@@ -1,9 +1,6 @@
 import sys
 import time
-import math
-from dataclasses import dataclass
 
-import numpy as np
 import pyqtgraph as pg
 
 from PySide6.QtCore import Qt, QTimer
@@ -14,89 +11,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtSvgWidgets import QGraphicsSvgItem
 
-
-# -----------------------------
-# Simulação (bem simples, só para provar o loop + UI)
-# -----------------------------
-@dataclass
-class SimState:
-    transport: str = "STOP"     # STOP/PLAY/FF/REW/PAUSE
-    rpm_setpoint: float = 0.0
-    rpm: float = 0.0
-    pwm: float = 0.0
-    err: float = 0.0
-    tension: float = 0.0
-
-    # "falhas" (sliders)
-    tape_friction: float = 0.0      # 0..1
-    encoder_jitter: float = 0.0     # 0..1
-
-    # ângulos visuais (graus)
-    reel_l_deg: float = 0.0
-    reel_r_deg: float = 0.0
-    capstan_deg: float = 0.0
-
-
-class Simulator:
-    """
-    Simulador mínimo:
-    - PLAY: setpoint ~ 1800 rpm (exemplo)
-    - STOP: setpoint 0
-    - Dinâmica simplificada: rpm segue setpoint com 1ª ordem + atrito
-    - pwm fictício = clamp(err * Kp)
-    """
-    def __init__(self):
-        self.s = SimState()
-        self.Kp = 0.02
-        self.tau = 0.25  # constante de tempo (s)
-
-    def set_transport(self, mode: str):
-        self.s.transport = mode
-
-    def step(self, dt: float):
-        # setpoints por modo
-        if self.s.transport == "PLAY":
-            self.s.rpm_setpoint = 1800.0
-        elif self.s.transport == "FF":
-            self.s.rpm_setpoint = 2600.0
-        elif self.s.transport == "REW":
-            self.s.rpm_setpoint = 2600.0
-        elif self.s.transport == "PAUSE":
-            self.s.rpm_setpoint = 300.0
-        else:
-            self.s.rpm_setpoint = 0.0
-
-        # erro e "pwm" (controle fictício)
-        self.s.err = self.s.rpm_setpoint - self.s.rpm
-        pwm = self.Kp * self.s.err
-        pwm = max(min(pwm, 1.0), -1.0)
-        self.s.pwm = pwm
-
-        # atrito e "tensão" simulada
-        friction_load = self.s.tape_friction * 600.0  # rpm "equivalente" de carga
-        self.s.tension = self.s.tape_friction * (0.3 + 0.7 * abs(self.s.pwm))
-
-        # dinâmica 1ª ordem (bem simples)
-        target = self.s.rpm_setpoint - friction_load * abs(self.s.pwm)
-        target = max(target, 0.0)
-
-        alpha = dt / (self.tau + dt)
-        self.s.rpm = (1 - alpha) * self.s.rpm + alpha * target
-
-        # encoder jitter (só para demonstrar efeito visual)
-        jitter = (np.random.randn() * self.s.encoder_jitter * 20.0)
-        rpm_for_visual = max(self.s.rpm + jitter, 0.0)
-
-        # converter rpm -> rad/s
-        omega = (rpm_for_visual * 2 * math.pi) / 60.0
-
-        # atualizar ângulos (graus)
-        self.s.capstan_deg = (self.s.capstan_deg + math.degrees(omega * dt)) % 360.0
-        # reels: velocidades proporcionais (só “pra ver” rodar)
-        self.s.reel_l_deg = (self.s.reel_l_deg + math.degrees(0.6 * omega * dt)) % 360.0
-        self.s.reel_r_deg = (self.s.reel_r_deg + math.degrees(0.9 * omega * dt)) % 360.0
-
-        return self.s
+from sim import Simulator
 
 
 # -----------------------------
@@ -131,6 +46,18 @@ class MainWindow(QMainWindow):
         self.reel_l = QGraphicsSvgItem("assets/svg/reel_left.svg")
         self.reel_r = QGraphicsSvgItem("assets/svg/reel_right.svg")
         self.capstan = QGraphicsSvgItem("assets/svg/capstan.svg")
+
+        # Os SVGs foram exportados com 800 x 800 px. Exibi-los no tamanho
+        # original faz com que ocupem praticamente toda a cena, portanto cada
+        # componente recebe uma largura visual adequada, mantendo a proporção.
+        def set_svg_width(item, width):
+            original_width = item.boundingRect().width()
+            if original_width > 0:
+                item.setScale(width / original_width)
+
+        set_svg_width(self.reel_l, 180)
+        set_svg_width(self.reel_r, 180)
+        set_svg_width(self.capstan, 70)
 
         # Adicionar na cena
         self.scene.addItem(self.reel_l)
@@ -218,7 +145,7 @@ class MainWindow(QMainWindow):
         self.cur_tension = self.plot_tension.plot([], [])
 
         # Buffers
-        self.t0 = time.time()
+        self.t0 = time.monotonic()
         self.window_s = 20.0
         self.ts = []
         self.rpm_sp = []
@@ -228,13 +155,13 @@ class MainWindow(QMainWindow):
         self.tension = []
 
         # Timer de simulação
-        self.last = time.time()
+        self.last = time.monotonic()
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.tick)
         self.timer.start(16)  # ~60 FPS UI (sim também, por enquanto)
 
     def tick(self):
-        now = time.time()
+        now = time.monotonic()
         dt = now - self.last
         self.last = now
 

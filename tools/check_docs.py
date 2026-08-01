@@ -1,0 +1,97 @@
+"""Valida links Markdown locais e a estrutura mínima das especificações."""
+
+from pathlib import Path
+import re
+import sys
+import unicodedata
+
+
+ROOT = Path(__file__).resolve().parent.parent
+MARKDOWN_LINK = re.compile(r"\[[^]]*\]\(([^)]+)\)")
+REQUIRED_SPEC_SECTIONS = {
+    "## Contexto",
+    "## Objetivo",
+    "## Fora de escopo",
+    "## Requisitos funcionais",
+    "## Critérios de aceitação",
+    "## Evidências de implementação",
+}
+
+
+def markdown_files():
+    yield ROOT / "README.md"
+    yield ROOT / "CONTRIBUTING.md"
+    yield ROOT / "CHANGELOG.md"
+    yield from sorted((ROOT / "docs").rglob("*.md"))
+
+
+def heading_anchors(text):
+    anchors = set()
+    counts = {}
+    for heading in re.findall(r"^#{1,6}\s+(.+?)\s*$", text, re.MULTILINE):
+        normalized = unicodedata.normalize("NFKD", heading)
+        normalized = "".join(char for char in normalized if not unicodedata.combining(char))
+        anchor = normalized.lower()
+        anchor = re.sub(r"[^\w\s-]", "", anchor)
+        anchor = re.sub(r"[\s_]+", "-", anchor).strip("-")
+        occurrence = counts.get(anchor, 0)
+        counts[anchor] = occurrence + 1
+        if occurrence:
+            anchor = f"{anchor}-{occurrence}"
+        anchors.add(anchor)
+    return anchors
+
+
+def check_links(path):
+    errors = []
+    text = path.read_text(encoding="utf-8")
+    for raw_target in MARKDOWN_LINK.findall(text):
+        raw_target = raw_target.strip()
+        if "://" in raw_target or raw_target.startswith("mailto:"):
+            continue
+        target, separator, anchor = raw_target.partition("#")
+        resolved = (path.parent / target).resolve() if target else path.resolve()
+        if not resolved.exists():
+            errors.append(f"{path.relative_to(ROOT)}: link inexistente: {target}")
+            continue
+        if separator and resolved.suffix == ".md":
+            linked_text = resolved.read_text(encoding="utf-8")
+            if anchor not in heading_anchors(linked_text):
+                errors.append(
+                    f"{path.relative_to(ROOT)}: âncora inexistente: {raw_target}"
+                )
+    return errors
+
+
+def check_specs():
+    errors = []
+    for path in sorted((ROOT / "docs/specs").glob("*/spec.md")):
+        text = path.read_text(encoding="utf-8")
+        for section in REQUIRED_SPEC_SECTIONS:
+            if section not in text:
+                errors.append(
+                    f"{path.relative_to(ROOT)}: seção obrigatória ausente: {section}"
+                )
+        if not re.search(r"\*\*Estado:\*\* (Draft|Approved|In Progress|Implemented|Superseded)", text):
+            errors.append(f"{path.relative_to(ROOT)}: estado ausente ou inválido")
+    return errors
+
+
+def main():
+    errors = []
+    for path in markdown_files():
+        errors.extend(check_links(path))
+    errors.extend(check_specs())
+
+    if errors:
+        print("Falhas na documentação:")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+
+    print("Documentação validada com sucesso.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
