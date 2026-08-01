@@ -15,13 +15,17 @@ controle defeituosos em equipamentos profissionais.
 O simulador deve permitir comparar a mesma planta e as mesmas perturbações em
 dois cenários:
 
-```text
-Digital Tach OFF                   Digital Tach ON
-Comando nominal sem PID            Encoder + PID em malha fechada
-          ↓                                  ↓
-Variação física da fita            Velocidade física corrigida
-          ↓                                  ↓
-Wow/flutter audível                Áudio mais estável
+```mermaid
+flowchart LR
+    subgraph Off[Digital Tach OFF]
+        OffCommand[Comando nominal sem PID] --> OffSpeed[Variação física da fita]
+        OffSpeed --> OffAudio[Wow/flutter audível]
+    end
+    subgraph On[Digital Tach ON]
+        OnControl[Encoder + PID em malha fechada] --> OnSpeed[Velocidade física corrigida]
+        OnSpeed --> OnAudio[Áudio mais estável]
+    end
+    OffCommand -. mesma planta e perturbação .-> OnControl
 ```
 
 ## Evidência desejada
@@ -56,4 +60,3 @@ conhecidos.
 - Compatibilidade elétrica e mecânica ainda não foi estudada.
 - Sensor, atuador e modelos de tape deck alvo ainda não foram escolhidos.
 - Nenhuma alegação comercial deve se apoiar apenas nos resultados simulados.
-

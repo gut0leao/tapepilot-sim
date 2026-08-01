@@ -3,10 +3,14 @@
 Este diretório mantém o conhecimento necessário para entender o TapePilot e
 controlar sua evolução. A documentação segue esta separação:
 
-```text
-AS-IS                  TO-BE                  HISTÓRICO
-docs/specs/            docs/changes/          docs/changes/archive/
-Como funciona hoje     Como queremos mudar    Como e por que mudou
+```mermaid
+flowchart LR
+    AsIs["AS-IS<br/>docs/specs/<br/>Como funciona hoje"]
+    ToBe["TO-BE<br/>docs/changes/<br/>Como queremos mudar"]
+    History["HISTÓRICO<br/>docs/changes/archive/<br/>Como e por que mudou"]
+    AsIs -->|change propõe delta| ToBe
+    ToBe -->|implementação validada| History
+    History -.->|delta incorporado| AsIs
 ```
 
 ## Por onde começar
@@ -68,6 +72,13 @@ change é movida para `changes/archive/`.
 | O que talvez seja feito depois? | `roadmap.md` |
 | Por que uma decisão foi tomada? | `decisions/` |
 | Como o trabalho é priorizado e acompanhado? | `project-management.md` |
+
+## Diagramas
+
+Diagramas de fluxo, componentes, estados, sequência e hierarquia devem usar
+[Mermaid](https://mermaid.js.org/), em blocos cercados identificados por
+`mermaid`. Blocos `text` permanecem reservados para fórmulas, formatos literais
+e exemplos que não representam relações visuais.
 
 Documente somente o necessário para definir comportamento, decisão, validação
 ou contexto duradouro. Detalhes evidentes no código não precisam ser repetidos.

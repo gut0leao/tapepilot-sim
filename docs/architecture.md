@@ -5,10 +5,12 @@
 O TapePilot é uma aplicação desktop pequena, com o núcleo da simulação separado
 da interface. A janela está em `app.py`; estado e modelo estão em `sim/`.
 
-```text
-Controles da UI ──► Simulator ──► SimState ──► telemetria e gráficos
-                         │
-                         └───────────────────► animação dos SVGs
+```mermaid
+flowchart LR
+    Controls[Controles da UI] --> Simulator
+    Simulator --> SimState
+    SimState --> Telemetry[Telemetria e gráficos]
+    Simulator --> Animation[Animação dos SVGs]
 ```
 
 Essa organização é adequada para provar a ideia, mas não é o destino
@@ -80,27 +82,28 @@ Os caminhos dos assets são relativos à raiz do repositório.
 A evolução pretendida separa planta, controle, sensor, perturbações, áudio e
 apresentação:
 
-```text
-app.py
-sim/
-├── model.py          # existente; será decomposto gradualmente
-├── state.py          # planejado
-├── plant.py          # planejado
-├── controller.py     # planejado
-├── encoder.py        # planejado
-├── faults.py         # planejado
-└── metrics.py        # planejado
-audio/
-├── source.py         # planejado
-└── playback.py       # planejado
-ui/
-├── main_window.py      # planejado
-├── mechanics_scene.py  # planejado
-└── plots.py            # planejado
-tests/
-├── test_simulator.py   # existente
-├── test_plant.py       # planejado
-└── test_controller.py  # planejado
+```mermaid
+flowchart TD
+    Root["tapepilot-sim/"] --> App["app.py — existente"]
+    Root --> Sim["sim/"]
+    Sim --> Model["model.py — existente; decomposição gradual"]
+    Sim --> State["state.py — planejado"]
+    Sim --> Plant["plant.py — planejado"]
+    Sim --> Controller["controller.py — planejado"]
+    Sim --> Encoder["encoder.py — planejado"]
+    Sim --> Faults["faults.py — planejado"]
+    Sim --> Metrics["metrics.py — planejado"]
+    Root --> Audio["audio/"]
+    Audio --> Source["source.py — planejado"]
+    Audio --> Playback["playback.py — planejado"]
+    Root --> UI["ui/"]
+    UI --> MainWindow["main_window.py — planejado"]
+    UI --> Scene["mechanics_scene.py — planejado"]
+    UI --> Plots["plots.py — planejado"]
+    Root --> Tests["tests/"]
+    Tests --> SimulatorTest["test_simulator.py — existente"]
+    Tests --> PlantTest["test_plant.py — planejado"]
+    Tests --> ControllerTest["test_controller.py — planejado"]
 ```
 
 Os arquivos marcados como planejados representam a direção futura. A migração

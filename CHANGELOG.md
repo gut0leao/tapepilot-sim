@@ -26,6 +26,7 @@ versão estável publicada.
 - O relógio da interface passou a usar fonte monotônica.
 - SVGs recebem dimensões visuais explícitas.
 - GitHub Actions oficiais atualizadas para versões baseadas em Node.js 24.
+- Diagramas da documentação foram padronizados em Mermaid.
 
 ### Fixed
 

@@ -8,6 +8,8 @@ import unicodedata
 
 ROOT = Path(__file__).resolve().parent.parent
 MARKDOWN_LINK = re.compile(r"\[[^]]*\]\(([^)]+)\)")
+TEXT_BLOCK = re.compile(r"^```text\s*$([\s\S]*?)^```\s*$", re.MULTILINE)
+DIAGRAM_GLYPHS = re.compile(r"[─│┌┐└┘├┤┬┴┼►◄▲▼→←]")
 REQUIRED_SPEC_SECTIONS = {
     "## Propósito",
     "## Escopo",
@@ -70,6 +72,17 @@ def check_links(path):
                 errors.append(
                     f"{path.relative_to(ROOT)}: âncora inexistente: {raw_target}"
                 )
+    return errors
+
+
+def check_diagrams(path):
+    errors = []
+    text = path.read_text(encoding="utf-8")
+    for block in TEXT_BLOCK.findall(text):
+        if DIAGRAM_GLYPHS.search(block):
+            errors.append(
+                f"{path.relative_to(ROOT)}: diagrama textual deve usar Mermaid"
+            )
     return errors
 
 
@@ -159,6 +172,7 @@ def main():
     errors = []
     for path in markdown_files():
         errors.extend(check_links(path))
+        errors.extend(check_diagrams(path))
     errors.extend(check_specs())
     errors.extend(check_changes())
 

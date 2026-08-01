@@ -2,12 +2,19 @@
 
 ## Arquitetura proposta
 
-```text
-Setpoint ──► seletor OFF/ON ──► atuador ──► planta ──► velocidade física
-                  ▲                           │                │
-                  └──── PID ◄── encoder ◄─────┘                └──► áudio
-                                              ▲
-                                  wow/flutter ┘
+```mermaid
+flowchart LR
+    Setpoint --> Selector{Digital Tach}
+    Selector -->|OFF| Nominal[Comando nominal]
+    Selector -->|ON| PID
+    Nominal --> Actuator[Atuador]
+    PID --> Actuator
+    Actuator --> Plant[Planta]
+    Disturbance[Wow / flutter] --> Plant
+    Plant --> Speed[Velocidade física]
+    Speed --> Encoder
+    Encoder --> PID
+    Speed --> Audio[Áudio]
 ```
 
 Em `OFF`, o PID é contornado e um comando nominal alimenta a planta. Em `ON`, o
@@ -68,8 +75,12 @@ Planta, gerador de perturbações, encoder e PID compartilham inicialmente um
 passo fixo de `1 ms` (`1000 Hz`). A GUI continua solicitando atualizações em
 intervalos nominais de `16 ms`, mas deixa de determinar o passo do núcleo:
 
-```text
-tempo monotônico → acumulador → passos fixos de 1 ms → estado mais recente → GUI
+```mermaid
+flowchart LR
+    Clock[Tempo monotônico] --> Accumulator[Acumulador]
+    Accumulator --> FixedSteps[Passos fixos de 1 ms]
+    FixedSteps --> State[Estado mais recente]
+    State --> GUI
 ```
 
 O acumulador executa os subpassos disponíveis e preserva a sobra inferior a

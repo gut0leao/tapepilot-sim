@@ -49,11 +49,12 @@ existir, ganha uma spec baseada em [`template.md`](template.md).
 Mudanças observáveis não são editadas diretamente na spec vigente antes da
 implementação. Elas começam em `docs/changes/<nome>/`:
 
-```text
-proposal.md
-spec-delta.md
-design.md
-tasks.md
+```mermaid
+flowchart TD
+    Change["docs/changes/&lt;nome&gt;/"] --> Proposal["proposal.md"]
+    Change --> Delta["spec-delta.md"]
+    Change --> Design["design.md"]
+    Change --> Tasks["tasks.md"]
 ```
 
 O fluxo completo está em [Processo de mudanças](../changes/README.md).

@@ -4,8 +4,13 @@ Este documento define como o trabalho do TapePilot é organizado. O repositório
 mantém regras, requisitos e decisões; GitHub Issues e GitHub Projects mantêm o
 estado operacional do trabalho.
 
-```text
-Roadmap → Product Backlog → Ready → In Progress → Review → Done
+```mermaid
+flowchart LR
+    Roadmap --> Backlog[Product Backlog]
+    Backlog --> Ready
+    Ready --> InProgress[In Progress]
+    InProgress --> Review
+    Review --> Done
 ```
 
 A sprint seleciona um conjunto de itens em `Ready`; ela não é um estado do
@@ -32,8 +37,12 @@ Ideias ainda vagas podem permanecer no roadmap sem Issue.
 
 O GitHub Project organiza as Issues usando os estados:
 
-```text
-Backlog → Ready → In Progress → Review → Done
+```mermaid
+flowchart LR
+    Backlog --> Ready
+    Ready --> InProgress[In Progress]
+    InProgress --> Review
+    Review --> Done
 ```
 
 Configuração-alvo:

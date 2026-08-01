@@ -63,21 +63,22 @@ sudo apt install -y \
 
 ## Estrutura atual
 
-```text
-tapepilot-sim/
-├── .github/workflows/
-├── app.py
-├── assets/
-│   └── svg/
-├── docs/
-│   ├── changes/
-│   ├── decisions/
-│   └── specs/
-├── sim/
-├── tests/
-├── tools/
-├── pyproject.toml
-└── README.md
+```mermaid
+flowchart TD
+    Root["tapepilot-sim/"]
+    Root --> Workflows[".github/workflows/"]
+    Root --> App["app.py"]
+    Root --> Assets["assets/"]
+    Assets --> SVG["svg/"]
+    Root --> Docs["docs/"]
+    Docs --> Changes["changes/"]
+    Docs --> Decisions["decisions/"]
+    Docs --> Specs["specs/"]
+    Root --> Sim["sim/"]
+    Root --> Tests["tests/"]
+    Root --> Tools["tools/"]
+    Root --> Pyproject["pyproject.toml"]
+    Root --> Readme["README.md"]
 ```
 
 ## Documentação

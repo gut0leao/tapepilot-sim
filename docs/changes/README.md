@@ -9,12 +9,12 @@ desejado.
 
 ## Estrutura
 
-```text
-docs/changes/<nome>/
-├── proposal.md
-├── spec-delta.md
-├── design.md
-└── tasks.md
+```mermaid
+flowchart TD
+    Change["docs/changes/&lt;nome&gt;/"] --> Proposal["proposal.md"]
+    Change --> Delta["spec-delta.md"]
+    Change --> Design["design.md"]
+    Change --> Tasks["tasks.md"]
 ```
 
 - `proposal.md`: problema, objetivo, impacto, estado e questões abertas;
