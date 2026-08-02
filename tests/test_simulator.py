@@ -69,6 +69,20 @@ class SimulatorCharacterizationTests(unittest.TestCase):
         self.assertGreater(state.reel_l_deg, 0.0)
         self.assertGreater(state.reel_r_deg, 0.0)
 
+    def test_encoder_dropout_does_not_control_the_current_plant(self):
+        simulator = Simulator()
+        simulator.set_transport("PLAY")
+        simulator.s.encoder_dropout = True
+
+        for _ in range(10):
+            state = simulator.step(0.001)
+
+        self.assertEqual(state.encoder_pulse_count, 0)
+        self.assertEqual(state.encoder_rpm_raw, 0.0)
+        self.assertEqual(state.encoder_rpm_filtered, 0.0)
+        self.assertGreater(state.rpm, 0.0)
+        self.assertEqual(state.pwm, 1.0)
+
 
 if __name__ == "__main__":
     unittest.main()

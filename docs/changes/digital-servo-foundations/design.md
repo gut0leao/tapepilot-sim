@@ -80,6 +80,32 @@ O ruído escolhe novos alvos a cada meio período característico e os suaviza p
 a presença entre aproximadamente `30%` e `100%`. A taxa em hertz controla a
 velocidade média das irregularidades, não uma senoide exata.
 
+## Encoder discreto
+
+O encoder incremental possui `100 pulsos/revolução`. A rotação física acumula
+frações de pulso a cada passo de `1 ms`; somente pulsos inteiros entram na
+contagem. A RPM medida é atualizada a cada `10 ms`:
+
+```text
+encoder_rpm_raw = pulsos_da_janela × 60 / (100 × duração_da_janela)
+```
+
+Perda percentual decide deterministicamente quais pulsos são descartados;
+dropout descarta todos. Depois da contagem, jitter adiciona ruído gaussiano com
+escala máxima configurada de `20 RPM`. Todos usam a semente `3301`.
+
+A medição bruta alimenta um passa-baixas de primeira ordem com `τ = 50 ms`:
+
+```text
+alpha = 1 - exp(-duração_da_janela / τ)
+encoder_rpm_filtered += alpha × (encoder_rpm_raw - encoder_rpm_filtered)
+```
+
+Nesta entrega, ambas as medições são observáveis. Planta, controlador
+proporcional e animação continuam usando `rpm`; a realimentação pelo encoder
+começa com o PID da Issue #7 usando a RPM filtrada. Dropout permanece um sinal
+separado porque o filtro leva algum tempo para decair.
+
 ## PID e transições
 
 Em `OFF`, a planta recebe somente o comando nominal fixo. Em `ON`, recebe a

@@ -33,12 +33,17 @@ class EpisodeGate:
         self.active = False
         self.remaining = 0.0
         self.initialized = False
+        self.last_occurrence = 0.0
 
     def _varied(self, mean: float) -> float:
         return max(mean * self.random.uniform(0.5, 1.5), 0.001)
 
     def step(self, dt: float, occurrence: float, mean_duration: float) -> bool:
         occurrence = min(max(occurrence, 0.0), 1.0)
+        if occurrence != self.last_occurrence:
+            self.initialized = False
+            self.remaining = 0.0
+            self.last_occurrence = occurrence
         if occurrence <= 0.0:
             self.active = False
             self.remaining = 0.0

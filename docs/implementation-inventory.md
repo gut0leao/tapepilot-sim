@@ -14,7 +14,7 @@ sem efeito observável.
 | `sim/controller.py` | Controle proporcional e saturação vigentes | `speed-control` | `tests/test_components.py` |
 | `sim/plant.py` | Resposta de primeira ordem vigente | `speed-control` | `tests/test_components.py` |
 | `sim/faults.py` | Carga de atrito e indicador de tensão vigentes | `fault-injection` | `tests/test_components.py` |
-| `sim/encoder.py` | Jitter aplicado à medição visual vigente | `fault-injection` | `tests/test_components.py` |
+| `sim/encoder.py` | Encoder discreto, jitter, perda de pulsos e dropout | change `digital-servo-foundations` | `tests/test_components.py` |
 | `sim/runtime.py` | Conversão de tempo real em passos fixos limitados | change `digital-servo-foundations` | `tests/test_components.py` |
 | `sim/__init__.py` | API pública de `SimState` e `Simulator` | `simulation-runtime` | importação pelos testes |
 | `assets/svg/*.svg` | Bobinas e capstan da cena | `mechanics-visualization` | carregamento visual manual |

@@ -1,8 +1,6 @@
 import unittest
-from unittest.mock import patch
-
 from sim.controller import ProportionalController
-from sim.encoder import VisualEncoder
+from sim.encoder import DiscreteEncoder
 from sim.faults import EpisodeGate, FaultModel, NaturalDisturbance, WowFlutterGenerator
 from sim.plant import FirstOrderPlant
 from sim.runtime import FixedStepScheduler
@@ -27,11 +25,54 @@ class ExtractedComponentTests(unittest.TestCase):
         self.assertEqual(target, 1200.0)
         self.assertEqual(tension, 1.0)
 
-    @patch("sim.encoder.random.gauss", return_value=1.0)
-    def test_encoder_preserves_visual_jitter(self, _gauss):
-        measured = VisualEncoder().measured_rpm(100.0, 0.5)
+    def test_encoder_counts_pulses_and_measures_rpm_in_window(self):
+        encoder = DiscreteEncoder()
 
-        self.assertEqual(measured, 110.0)
+        for _ in range(10):
+            pulses, raw, filtered = encoder.step(600.0, 0.001)
+
+        self.assertEqual(pulses, 10)
+        self.assertAlmostEqual(raw, 600.0)
+        self.assertGreater(filtered, 0.0)
+        self.assertLess(filtered, raw)
+
+    def test_encoder_dropout_discards_all_pulses(self):
+        encoder = DiscreteEncoder()
+
+        for _ in range(10):
+            pulses, raw, filtered = encoder.step(600.0, 0.001, dropout=True)
+
+        self.assertEqual(pulses, 0)
+        self.assertEqual(raw, 0.0)
+        self.assertEqual(filtered, 0.0)
+
+    def test_encoder_full_loss_discards_all_pulses(self):
+        encoder = DiscreteEncoder()
+
+        for _ in range(10):
+            pulses, raw, filtered = encoder.step(600.0, 0.001, pulse_loss=1.0)
+
+        self.assertEqual(pulses, 0)
+        self.assertEqual(raw, 0.0)
+        self.assertEqual(filtered, 0.0)
+
+    def test_encoder_filter_converges_to_raw_measurement(self):
+        encoder = DiscreteEncoder()
+
+        for _ in range(1000):
+            _, raw, filtered = encoder.step(600.0, 0.001)
+
+        self.assertAlmostEqual(raw, 600.0)
+        self.assertAlmostEqual(filtered, 600.0, places=3)
+
+    def test_encoder_faults_are_reproducible(self):
+        first = DiscreteEncoder()
+        second = DiscreteEncoder()
+
+        first_values = [first.step(600.0, 0.001, 0.5, 0.3) for _ in range(100)]
+        second_values = [second.step(600.0, 0.001, 0.5, 0.3) for _ in range(100)]
+
+        self.assertEqual(first_values, second_values)
 
     def test_disturbance_is_deterministic(self):
         first = WowFlutterGenerator()
@@ -150,6 +191,15 @@ class ExtractedComponentTests(unittest.TestCase):
 
         self.assertIn(True, values)
         self.assertIn(False, values)
+
+    def test_occurrence_change_reschedules_the_current_interval(self):
+        gate = EpisodeGate(10)
+        gate.step(0.1, 0.01, 3.0)
+        previous_remaining = gate.remaining
+
+        gate.step(0.1, 0.5, 3.0)
+
+        self.assertLess(gate.remaining, previous_remaining)
 
     def test_scheduler_converts_gui_time_to_fixed_steps(self):
         scheduler = FixedStepScheduler()

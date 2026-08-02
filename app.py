@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget,
     QHBoxLayout, QVBoxLayout, QGridLayout,
     QPushButton, QSlider, QLabel, QGraphicsView, QGraphicsScene,
-    QScrollArea
+    QScrollArea, QCheckBox
 )
 from PySide6.QtSvgWidgets import QGraphicsSvgItem
 
@@ -122,6 +122,15 @@ class MainWindow(QMainWindow):
         panel.addWidget(QLabel("Jitter do encoder"))
         panel.addWidget(self.sl_jitter)
 
+        self.sl_pulse_loss = QSlider(Qt.Horizontal)
+        self.sl_pulse_loss.setRange(0, 100)
+        self.sl_pulse_loss.setValue(0)
+        panel.addWidget(QLabel("Perda de pulsos do encoder"))
+        panel.addWidget(self.sl_pulse_loss)
+
+        self.chk_encoder_dropout = QCheckBox("Dropout do encoder")
+        panel.addWidget(self.chk_encoder_dropout)
+
         panel.addWidget(QLabel("Wow / Flutter"))
 
         self.wow_frequency = QSlider(Qt.Horizontal)
@@ -207,7 +216,7 @@ class MainWindow(QMainWindow):
         # ---------- Gráficos (pyqtgraph) ----------
         pg.setConfigOptions(antialias=True)
 
-        self.plot_rpm = pg.PlotWidget(title="RPM (setpoint vs medido)")
+        self.plot_rpm = pg.PlotWidget(title="RPM (setpoint, física e encoder)")
         self.plot_pwm = pg.PlotWidget(title="PWM / Comando")
         self.plot_err = pg.PlotWidget(title="Erro")
         self.plot_tension = pg.PlotWidget(title="Tensão (simulada)")
@@ -217,8 +226,21 @@ class MainWindow(QMainWindow):
         bottom.addWidget(self.plot_err, 1)
         bottom.addWidget(self.plot_tension, 1)
 
-        self.cur_rpm_sp = self.plot_rpm.plot([], [])
-        self.cur_rpm = self.plot_rpm.plot([], [])
+        self.plot_rpm.addLegend()
+        self.cur_rpm_sp = self.plot_rpm.plot(
+            [], [],
+            pen=pg.mkPen("#bd93f9", width=2),
+            name="Setpoint",
+        )
+        self.cur_rpm = self.plot_rpm.plot(
+            [], [], pen=pg.mkPen("#50fa7b", width=2), name="RPM física"
+        )
+        self.cur_encoder_rpm = self.plot_rpm.plot(
+            [], [], pen=pg.mkPen("#8be9fd", width=2), name="Encoder filtrado"
+        )
+        self.cur_encoder_rpm_raw = self.plot_rpm.plot(
+            [], [], pen=pg.mkPen("#ffb86c", width=1), name="Encoder bruto"
+        )
         self.cur_pwm = self.plot_pwm.plot([], [])
         self.cur_err = self.plot_err.plot([], [])
         self.cur_tension = self.plot_tension.plot([], [])
@@ -229,6 +251,8 @@ class MainWindow(QMainWindow):
         self.ts = []
         self.rpm_sp = []
         self.rpm = []
+        self.encoder_rpm = []
+        self.encoder_rpm_raw = []
         self.pwm = []
         self.err = []
         self.tension = []
@@ -279,6 +303,8 @@ class MainWindow(QMainWindow):
         # ler sliders
         self.sim.s.tape_friction = self.sl_friction.value() / 100.0
         self.sim.s.encoder_jitter = self.sl_jitter.value() / 100.0
+        self.sim.s.encoder_pulse_loss = self.sl_pulse_loss.value() / 100.0
+        self.sim.s.encoder_dropout = self.chk_encoder_dropout.isChecked()
         disturbances = self.sim.faults.disturbances
         disturbances.wow.set_frequency(self.wow_frequency.value() / 10.0)
         disturbances.wow.set_amplitude(self.wow_amplitude.value() / 10000.0)
@@ -307,6 +333,11 @@ class MainWindow(QMainWindow):
             f"RPM: {s.rpm:7.1f} | Set: {s.rpm_setpoint:7.1f}\n"
             f"PWM: {s.pwm:+.3f} | Err: {s.err:+.1f}\n"
             f"Atrito: {s.tape_friction:.2f} | Jitter: {s.encoder_jitter:.2f}\n"
+            f"Encoder bruto: {s.encoder_rpm_raw:7.1f} RPM\n"
+            f"Encoder filtrado: {s.encoder_rpm_filtered:7.1f} RPM | "
+            f"Pulsos: {s.encoder_pulse_count}\n"
+            f"Perda: {s.encoder_pulse_loss * 100:.0f}% | "
+            f"Dropout: {'ON' if s.encoder_dropout else 'OFF'}\n"
             f"Wow: {s.wow_disturbance * 100:+.2f}% | "
             f"Flutter: {s.flutter_disturbance * 100:+.2f}%\n"
             f"Tensão: {s.tension:.3f}"
@@ -317,6 +348,8 @@ class MainWindow(QMainWindow):
         self.ts.append(t)
         self.rpm_sp.append(s.rpm_setpoint)
         self.rpm.append(s.rpm)
+        self.encoder_rpm.append(s.encoder_rpm_filtered)
+        self.encoder_rpm_raw.append(s.encoder_rpm_raw)
         self.pwm.append(s.pwm)
         self.err.append(s.err)
         self.tension.append(s.tension)
@@ -326,6 +359,8 @@ class MainWindow(QMainWindow):
             self.ts.pop(0)
             self.rpm_sp.pop(0)
             self.rpm.pop(0)
+            self.encoder_rpm.pop(0)
+            self.encoder_rpm_raw.pop(0)
             self.pwm.pop(0)
             self.err.pop(0)
             self.tension.pop(0)
@@ -333,6 +368,8 @@ class MainWindow(QMainWindow):
         # atualizar plots
         self.cur_rpm_sp.setData(self.ts, self.rpm_sp)
         self.cur_rpm.setData(self.ts, self.rpm)
+        self.cur_encoder_rpm.setData(self.ts, self.encoder_rpm)
+        self.cur_encoder_rpm_raw.setData(self.ts, self.encoder_rpm_raw)
         self.cur_pwm.setData(self.ts, self.pwm)
         self.cur_err.setData(self.ts, self.err)
         self.cur_tension.setData(self.ts, self.tension)
@@ -340,6 +377,9 @@ class MainWindow(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
+    interface_font = app.font()
+    interface_font.setPointSize(max(interface_font.pointSize() + 4, 13))
+    app.setFont(interface_font)
     w = MainWindow()
     w.resize(1200, 700)
     w.show()

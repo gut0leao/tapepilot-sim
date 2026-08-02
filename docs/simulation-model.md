@@ -23,6 +23,11 @@ As variáveis principais são:
 | `err` | erro de velocidade | RPM |
 | `tape_friction` | intensidade do atrito | 0 a 1 |
 | `encoder_jitter` | intensidade do ruído | 0 a 1 |
+| `encoder_pulse_loss` | probabilidade de perda por pulso | 0 a 1 |
+| `encoder_dropout` | descarte total de pulsos | booleano |
+| `encoder_pulse_count` | pulsos aceitos acumulados | inteiro |
+| `encoder_rpm_raw` | velocidade quantizada estimada pelo encoder | RPM |
+| `encoder_rpm_filtered` | medição após passa-baixas de `50 ms` | RPM |
 | `tension` | indicador visual de tensão | sem unidade |
 
 ## Modos de transporte
@@ -79,18 +84,22 @@ target = max(target, 0)
 Essa fórmula é uma heurística e não uma equação mecânica. O limite inferior em
 zero também impede, no estado atual, a representação do sentido reverso.
 
-## Jitter
+## Encoder discreto em revisão
 
-O ruído é gaussiano:
+O encoder gera `100 pulsos/revolução`. Frações são acumuladas a cada passo e a
+medição é atualizada em janelas de `10 ms`:
 
 ```text
-jitter = normal(μ=0, σ=1) × encoder_jitter × 20
-rpm_visual = max(rpm + jitter, 0)
+encoder_rpm_raw = window_pulses × 60 / (100 × window_seconds)
+jitter = normal(μ=0, σ=1) × encoder_jitter × 20 RPM
 ```
 
-`rpm_visual` é usado somente para calcular os ângulos. O controlador e o gráfico
-de RPM continuam usando `rpm` sem ruído. Portanto, o nome “jitter do encoder” é
-uma aproximação da intenção futura, não um encoder modelado.
+Perda de pulsos entre `0%` e `100%` é aplicada individualmente; dropout descarta
+todos os pulsos. A sequência pseudoaleatória usa semente `3301`. Um filtro
+passa-baixas de primeira ordem com constante de `50 ms` reduz os degraus de
+`60 RPM`. As medições bruta e filtrada são observáveis, mas o controlador
+proporcional e a animação continuam usando `rpm` física até a implementação do
+PID; o PID usará inicialmente a RPM filtrada.
 
 ## Wow e flutter em revisão
 
@@ -148,7 +157,7 @@ zero.
 
 - Não há raio variável, inércia ou quantidade de fita por bobina.
 - Não há acoplamento mecânico entre bobinas, fita e capstan.
-- Não há encoder discreto nem perda de pulsos.
+- A medição do encoder ainda não realimenta o controlador.
 - Não há escorregamento, back-tension ou saturação física de torque.
 - A tensão é apenas um indicador.
 - A direção reversa ainda não existe.

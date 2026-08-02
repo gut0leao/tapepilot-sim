@@ -11,7 +11,7 @@ flowchart LR
     Simulator --> Controller[ProportionalController]
     Simulator --> Plant[FirstOrderPlant]
     Simulator --> Faults[FaultModel]
-    Simulator --> Encoder[VisualEncoder]
+    Simulator --> Encoder[DiscreteEncoder]
     Simulator --> SimState
     SimState --> Telemetry[Telemetria e gráficos]
     Simulator --> Animation[Animação dos SVGs]
@@ -40,11 +40,11 @@ Permanece como fachada compatível, recebe comandos de transporte e coordena:
 - `ProportionalController`, em `sim/controller.py`;
 - `FirstOrderPlant`, em `sim/plant.py`;
 - `FaultModel`, em `sim/faults.py`;
-- `VisualEncoder`, em `sim/encoder.py`;
+- `DiscreteEncoder`, em `sim/encoder.py`;
 - `FixedStepScheduler`, em `sim/runtime.py`;
 - `SimState`, em `sim/state.py`.
 
-As fórmulas e o fluxo observável permanecem os mesmos do baseline. O encoder
+As fórmulas e o fluxo observável da planta permanecem os mesmos do baseline. O encoder
 ainda produz apenas jitter visual; seu modelo discreto pertence à evolução
 aprovada, não ao estado atual.
 

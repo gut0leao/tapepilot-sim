@@ -26,8 +26,8 @@ limitação e possui uma proposta de mudança em elaboração.
 
 ## Injeção de falhas
 
-Os dois sliders possuem valores inteiros de 0 a 100, convertidos internamente
-para a faixa de 0 a 1.
+Os sliders de falhas possuem valores inteiros de 0 a 100, convertidos
+internamente para a faixa de 0 a 1.
 
 ### Atrito da fita
 
@@ -36,8 +36,15 @@ heurística visual, sem unidade física.
 
 ### Jitter do encoder
 
-Adiciona ruído gaussiano à velocidade usada para animar as peças. Apesar do
-nome, ele ainda não altera a RPM realimentada, a telemetria ou o gráfico.
+Adiciona ruído gaussiano reproduzível, com escala de até `20 RPM`, à medição do
+encoder. `Perda de pulsos` determina a probabilidade de descarte de cada pulso;
+`Dropout do encoder` descarta todos os pulsos enquanto estiver marcado.
+
+O encoder possui `100 pulsos/revolução` e atualiza sua estimativa a cada
+`10 ms`. A RPM bruta evidencia os degraus de quantização; a RPM filtrada usa um
+passa-baixas com constante de `50 ms`. Nesta etapa, suas falhas aparecem na
+telemetria e nas curvas do encoder, mas não alteram planta, controlador,
+animação ou curva física de RPM.
 
 ### Wow e flutter
 
@@ -71,6 +78,7 @@ O painel mostra:
 - RPM simulada e setpoint;
 - PWM e erro;
 - níveis de atrito e jitter;
+- RPM bruta e filtrada, pulsos acumulados, perda e dropout do encoder;
 - valores instantâneos de wow e flutter;
 - tensão simulada.
 
@@ -80,7 +88,7 @@ O texto pode ser selecionado com o mouse.
 
 Os gráficos são atualizados em tempo real e preservam os últimos 20 segundos:
 
-- RPM desejada e simulada;
+- RPM desejada, física, bruta do encoder e filtrada do encoder;
 - PWM/comando;
 - erro de controle;
 - tensão simulada.

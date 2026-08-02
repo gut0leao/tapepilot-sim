@@ -8,7 +8,7 @@ e reutilizado separadamente da interface.
 import math
 
 from .controller import ProportionalController
-from .encoder import VisualEncoder
+from .encoder import DiscreteEncoder
 from .faults import FaultModel
 from .plant import FirstOrderPlant
 from .runtime import FixedStepScheduler
@@ -23,7 +23,7 @@ class Simulator:
         self.controller = ProportionalController()
         self.plant = FirstOrderPlant()
         self.faults = FaultModel()
-        self.encoder = VisualEncoder()
+        self.encoder = DiscreteEncoder()
         self.scheduler = FixedStepScheduler()
 
     @property
@@ -82,10 +82,18 @@ class Simulator:
         ) = self.faults.apply_speed_disturbance(target, dt)
         self.s.rpm = self.plant.advance(self.s.rpm, target, dt)
 
-        rpm_for_visual = self.encoder.measured_rpm(
-            self.s.rpm, self.s.encoder_jitter
+        (
+            self.s.encoder_pulse_count,
+            self.s.encoder_rpm_raw,
+            self.s.encoder_rpm_filtered,
+        ) = self.encoder.step(
+            self.s.rpm,
+            dt,
+            self.s.encoder_jitter,
+            self.s.encoder_pulse_loss,
+            self.s.encoder_dropout,
         )
-        omega = (rpm_for_visual * 2 * math.pi) / 60.0
+        omega = (self.s.rpm * 2 * math.pi) / 60.0
 
         self.s.capstan_deg = (
             self.s.capstan_deg + math.degrees(omega * dt)

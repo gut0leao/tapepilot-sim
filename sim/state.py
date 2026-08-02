@@ -16,6 +16,11 @@ class SimState:
 
     tape_friction: float = 0.0
     encoder_jitter: float = 0.0
+    encoder_pulse_loss: float = 0.0
+    encoder_dropout: bool = False
+    encoder_pulse_count: int = 0
+    encoder_rpm_raw: float = 0.0
+    encoder_rpm_filtered: float = 0.0
     wow_disturbance: float = 0.0
     flutter_disturbance: float = 0.0
     speed_disturbance: float = 0.0
