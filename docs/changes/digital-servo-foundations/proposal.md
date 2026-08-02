@@ -55,9 +55,9 @@ perturbações surgem em episódios determinísticos, mas irregulares.
 
 - **Código:** componentes extraídos em `sim/state.py`, `controller.py`,
   `plant.py`, `faults.py` e `encoder.py`; scheduler fixo, wow/flutter e encoder
-  discreto estão implementados localmente para revisão; PID ainda pende.
-- **Testes:** trinta testes passam, incluindo scheduler, perturbações, pulsos,
-  janela de medição, filtro, perda, dropout e reprodutibilidade;
+  discreto e PID estão implementados localmente para revisão.
+- **Testes:** quarenta e dois testes e oito cenários de integração headless passam, incluindo
+  scheduler, perturbações, encoder, PID, fallback, transferências e RMS móvel;
   workflow [Quality 30703602470](https://github.com/gut0leao/tapepilot-sim/actions/runs/30703602470) aprovado.
 - **Validação manual:** interface, controles naturais e episódios aleatórios de
   wow/flutter, encoder bruto e filtrado aprovados pelo mantenedor em 2026-08-01,

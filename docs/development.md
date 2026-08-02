@@ -44,6 +44,7 @@ Execute toda a validação local com:
 
 ```bash
 python3 tools/check_docs.py
+python3 tools/run_scenarios.py
 python3 -m unittest discover -v
 python3 -m py_compile app.py sim/*.py tests/*.py tools/*.py
 ```
@@ -57,6 +58,37 @@ python3 -m pytest
 
 Os testes do domínio não exigem a criação de uma janela Qt.
 
+### Testes de integração headless por cenários
+
+Os arquivos em `tests/scenarios/` descrevem sequências completas de transporte,
+falhas e controle. Execute todos com:
+
+```bash
+python3 tools/run_scenarios.py --output test-results
+```
+
+Cada cenário gera uma série temporal CSV e um resumo JSON com métricas,
+expectativas e resultado. `test-results/` é descartável e ignorado pelo Git.
+Para executar somente um caso:
+
+```bash
+python3 tools/run_scenarios.py --scenario wow_tach_on
+```
+
+O processo retorna código diferente de zero se qualquer expectativa falhar.
+
+O projeto distingue três níveis de teste:
+
+- **unitários:** verificam isoladamente componentes como encoder, PID e métrica
+  RMS;
+- **integração headless por cenários:** integram transporte, planta, controle,
+  encoder, perturbações, métricas, estado e tempo sem abrir a interface;
+- **interface/end-to-end:** deverão exercitar Qt, eventos do usuário, SVGs e
+  gráficos reais; ainda não estão implementados.
+
+Os cenários headless não devem ser chamados de end-to-end porque não atravessam
+a camada gráfica.
+
 ### Cobertura de caracterização atual
 
 Os testes registram o comportamento existente de:
@@ -67,6 +99,15 @@ Os testes registram o comportamento existente de:
 - efeito do atrito sobre RPM e tensão;
 - convergência para zero em `STOP`;
 - avanço dos três ângulos visuais.
+
+Os testes de integração headless por cenários cobrem STOP prolongado, PLAY em
+malha aberta, execução longa através de várias janelas RMS, comparação de wow
+com Digital Tach OFF/ON, wow máximo, fallback de dropout e parada depois de
+PLAY.
+
+`wow_max_tach_on` é um teste de estresse com limite de regressão de `0,5%`; ele
+não substitui o benchmark profissional de wow em `1%`, cujo limite permanece
+`0,2%` e cuja meta é `0,1%`.
 
 A interface Qt ainda não possui testes automatizados.
 

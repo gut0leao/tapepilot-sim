@@ -1,0 +1,10 @@
+{
+  "name": "stopped",
+  "duration_seconds": 5,
+  "events": [{"at": 0, "transport": "STOP"}],
+  "expect": [
+    {"path": "final.rpm", "equals": 0.0},
+    {"path": "final.command_applied", "equals": 0.0},
+    {"path": "observed.maximum_rpm", "equals": 0.0}
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "play_long_running",
+  "duration_seconds": 15,
+  "events": [{"at": 0, "transport": "PLAY"}],
+  "expect": [
+    {"path": "final.rpm", "min": 1799.0, "max": 1801.0},
+    {"path": "final.command_applied", "min": 0.5999, "max": 0.6001},
+    {"path": "final.rms_error_percent", "max": 0.001}
+  ]
+}

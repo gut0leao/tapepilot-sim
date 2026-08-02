@@ -1,0 +1,10 @@
+{
+  "name": "play_open_loop",
+  "duration_seconds": 8,
+  "events": [{"at": 0, "transport": "PLAY"}],
+  "expect": [
+    {"path": "final.rpm", "min": 1799.0, "max": 1801.0},
+    {"path": "final.command_applied", "min": 0.5999, "max": 0.6001},
+    {"path": "final.control_fallback", "equals": false}
+  ]
+}

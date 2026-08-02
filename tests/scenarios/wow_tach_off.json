@@ -1,0 +1,13 @@
+{
+  "name": "wow_tach_off",
+  "duration_seconds": 8,
+  "events": [{
+    "at": 0,
+    "transport": "PLAY",
+    "disturbances": {"wow": {"frequency": 0.5, "amplitude": 0.01, "occurrence": 1.0}}
+  }],
+  "expect": [
+    {"path": "final.rms_error_percent", "min": 0.2},
+    {"path": "final.command_applied", "min": 0.5999, "max": 0.6001}
+  ]
+}

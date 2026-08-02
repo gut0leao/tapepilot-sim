@@ -1,0 +1,16 @@
+{
+  "name": "wow_tach_on",
+  "duration_seconds": 8,
+  "events": [
+    {
+      "at": 0,
+      "transport": "PLAY",
+      "disturbances": {"wow": {"frequency": 0.5, "amplitude": 0.01, "occurrence": 1.0}}
+    },
+    {"at": 3, "state": {"digital_tach_enabled": true}}
+  ],
+  "expect": [
+    {"path": "final.rms_error_percent", "max": 0.2},
+    {"path": "observed.saturated_time_seconds", "max": 0.1}
+  ]
+}

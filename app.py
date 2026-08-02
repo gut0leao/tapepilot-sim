@@ -30,6 +30,11 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(root)
         main = QVBoxLayout(root)
 
+        # Telemetria fixa, visível acima da cena mecânica e dos gráficos.
+        self.lbl = QLabel("—")
+        self.lbl.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        main.addWidget(self.lbl)
+
         top = QHBoxLayout()
         main.addLayout(top, 2)
 
@@ -104,6 +109,39 @@ class MainWindow(QMainWindow):
         self.btn_ff.clicked.connect(lambda: self.sim.set_transport("FF"))
         self.btn_rew.clicked.connect(lambda: self.sim.set_transport("REW"))
         self.btn_pause.clicked.connect(lambda: self.sim.set_transport("PAUSE"))
+
+        panel.addSpacing(10)
+
+        self.chk_digital_tach = QCheckBox("Digital Tach ON")
+        panel.addWidget(self.chk_digital_tach)
+
+        self.pid_kp = QSlider(Qt.Horizontal)
+        self.pid_kp.setRange(0, 5000)
+        self.pid_kp.setValue(1000)
+        self.pid_kp_value = QLabel()
+        panel.addWidget(QLabel("PID — Kp"))
+        panel.addWidget(self.pid_kp)
+        panel.addWidget(self.pid_kp_value)
+
+        self.pid_ki = QSlider(Qt.Horizontal)
+        self.pid_ki.setRange(0, 10000)
+        self.pid_ki.setValue(2000)
+        self.pid_ki_value = QLabel()
+        panel.addWidget(QLabel("PID — Ki"))
+        panel.addWidget(self.pid_ki)
+        panel.addWidget(self.pid_ki_value)
+
+        self.pid_kd = QSlider(Qt.Horizontal)
+        self.pid_kd.setRange(0, 1000)
+        self.pid_kd.setValue(0)
+        self.pid_kd_value = QLabel()
+        panel.addWidget(QLabel("PID — Kd"))
+        panel.addWidget(self.pid_kd)
+        panel.addWidget(self.pid_kd_value)
+
+        for slider in (self.pid_kp, self.pid_ki, self.pid_kd):
+            slider.valueChanged.connect(self.update_pid_labels)
+        self.update_pid_labels()
 
         panel.addSpacing(10)
 
@@ -207,10 +245,6 @@ class MainWindow(QMainWindow):
 
         panel.addSpacing(10)
 
-        # “Telemetria”
-        self.lbl = QLabel("—")
-        self.lbl.setTextInteractionFlags(Qt.TextSelectableByMouse)
-        panel.addWidget(self.lbl)
         panel.addStretch(1)
 
         # ---------- Gráficos (pyqtgraph) ----------
@@ -220,11 +254,13 @@ class MainWindow(QMainWindow):
         self.plot_pwm = pg.PlotWidget(title="PWM / Comando")
         self.plot_err = pg.PlotWidget(title="Erro")
         self.plot_tension = pg.PlotWidget(title="Tensão (simulada)")
+        self.plot_rms = pg.PlotWidget(title="Erro RMS móvel (%)")
 
         bottom.addWidget(self.plot_rpm, 2)
         bottom.addWidget(self.plot_pwm, 1)
         bottom.addWidget(self.plot_err, 1)
         bottom.addWidget(self.plot_tension, 1)
+        bottom.addWidget(self.plot_rms, 1)
 
         self.plot_rpm.addLegend()
         self.cur_rpm_sp = self.plot_rpm.plot(
@@ -241,9 +277,24 @@ class MainWindow(QMainWindow):
         self.cur_encoder_rpm_raw = self.plot_rpm.plot(
             [], [], pen=pg.mkPen("#ffb86c", width=1), name="Encoder bruto"
         )
-        self.cur_pwm = self.plot_pwm.plot([], [])
+        self.plot_pwm.addLegend()
+        self.cur_pwm = self.plot_pwm.plot(
+            [], [], pen=pg.mkPen("#50fa7b", width=2), name="Aplicado"
+        )
+        self.cur_pwm_requested = self.plot_pwm.plot(
+            [], [], pen=pg.mkPen("#ff79c6", width=1), name="Solicitado"
+        )
         self.cur_err = self.plot_err.plot([], [])
         self.cur_tension = self.plot_tension.plot([], [])
+        self.cur_rms = self.plot_rms.plot(
+            [], [], pen=pg.mkPen("#8be9fd", width=2)
+        )
+        self.plot_rms.addItem(
+            pg.InfiniteLine(pos=0.1, angle=0, pen=pg.mkPen("#50fa7b", width=1))
+        )
+        self.plot_rms.addItem(
+            pg.InfiniteLine(pos=0.2, angle=0, pen=pg.mkPen("#ff5555", width=1))
+        )
 
         # Buffers
         self.t0 = time.monotonic()
@@ -254,8 +305,11 @@ class MainWindow(QMainWindow):
         self.encoder_rpm = []
         self.encoder_rpm_raw = []
         self.pwm = []
+        self.pwm_requested = []
         self.err = []
         self.tension = []
+        self.rms_ts = []
+        self.rms_percent = []
 
         # Timer de simulação
         self.last = time.monotonic()
@@ -272,6 +326,11 @@ class MainWindow(QMainWindow):
         self.flutter_amplitude.setValue(30)
         self.flutter_occurrence.setValue(0)
         self.flutter_duration.setValue(5)
+
+    def update_pid_labels(self, _value=None):
+        self.pid_kp_value.setText(f"{self.pid_kp.value() / 1_000_000:.6f}")
+        self.pid_ki_value.setText(f"{self.pid_ki.value() / 1_000_000:.6f}")
+        self.pid_kd_value.setText(f"{self.pid_kd.value() / 1_000_000:.6f}")
 
     def update_disturbance_labels(self, _value=None):
         self.wow_frequency_value.setText(
@@ -305,6 +364,10 @@ class MainWindow(QMainWindow):
         self.sim.s.encoder_jitter = self.sl_jitter.value() / 100.0
         self.sim.s.encoder_pulse_loss = self.sl_pulse_loss.value() / 100.0
         self.sim.s.encoder_dropout = self.chk_encoder_dropout.isChecked()
+        self.sim.s.digital_tach_enabled = self.chk_digital_tach.isChecked()
+        self.sim.controller.kp = self.pid_kp.value() / 1_000_000.0
+        self.sim.controller.ki = self.pid_ki.value() / 1_000_000.0
+        self.sim.controller.kd = self.pid_kd.value() / 1_000_000.0
         disturbances = self.sim.faults.disturbances
         disturbances.wow.set_frequency(self.wow_frequency.value() / 10.0)
         disturbances.wow.set_amplitude(self.wow_amplitude.value() / 10000.0)
@@ -332,6 +395,15 @@ class MainWindow(QMainWindow):
             f"Transport: {s.transport}\n"
             f"RPM: {s.rpm:7.1f} | Set: {s.rpm_setpoint:7.1f}\n"
             f"PWM: {s.pwm:+.3f} | Err: {s.err:+.1f}\n"
+            f"Digital Tach: "
+            f"{'FALLBACK' if s.control_fallback else ('ON' if s.digital_tach_enabled else 'OFF')} | "
+            f"Nominal: {s.command_nominal:+.3f}\n"
+            f"P: {s.pid_p:+.3f} | I: {s.pid_i:+.3f} | D: {s.pid_d:+.3f}\n"
+            f"Bias: {s.transfer_bias:+.3f} | Req: {s.command_requested:+.3f}\n"
+            f"Saturado: {'SIM' if s.actuator_saturated else 'NÃO'} | "
+            f"Integral: {'BLOQUEADA' if s.integral_blocked else 'LIVRE'}\n"
+            f"RMS: "
+            f"{f'{s.rms_error_percent:.3f}%' if s.rms_error_percent is not None else 'estabilizando'}\n"
             f"Atrito: {s.tape_friction:.2f} | Jitter: {s.encoder_jitter:.2f}\n"
             f"Encoder bruto: {s.encoder_rpm_raw:7.1f} RPM\n"
             f"Encoder filtrado: {s.encoder_rpm_filtered:7.1f} RPM | "
@@ -351,8 +423,18 @@ class MainWindow(QMainWindow):
         self.encoder_rpm.append(s.encoder_rpm_filtered)
         self.encoder_rpm_raw.append(s.encoder_rpm_raw)
         self.pwm.append(s.pwm)
+        self.pwm_requested.append(s.command_requested)
         self.err.append(s.err)
         self.tension.append(s.tension)
+        if s.rms_error_percent is None:
+            self.rms_ts.clear()
+            self.rms_percent.clear()
+        else:
+            self.rms_ts.append(t)
+            self.rms_percent.append(s.rms_error_percent)
+            while self.rms_ts and (self.rms_ts[-1] - self.rms_ts[0]) > self.window_s:
+                self.rms_ts.pop(0)
+                self.rms_percent.pop(0)
 
         # cortar para últimos N segundos
         while self.ts and (self.ts[-1] - self.ts[0]) > self.window_s:
@@ -362,6 +444,7 @@ class MainWindow(QMainWindow):
             self.encoder_rpm.pop(0)
             self.encoder_rpm_raw.pop(0)
             self.pwm.pop(0)
+            self.pwm_requested.pop(0)
             self.err.pop(0)
             self.tension.pop(0)
 
@@ -371,8 +454,10 @@ class MainWindow(QMainWindow):
         self.cur_encoder_rpm.setData(self.ts, self.encoder_rpm)
         self.cur_encoder_rpm_raw.setData(self.ts, self.encoder_rpm_raw)
         self.cur_pwm.setData(self.ts, self.pwm)
+        self.cur_pwm_requested.setData(self.ts, self.pwm_requested)
         self.cur_err.setData(self.ts, self.err)
         self.cur_tension.setData(self.ts, self.tension)
+        self.cur_rms.setData(self.rms_ts, self.rms_percent)
 
 
 def main():

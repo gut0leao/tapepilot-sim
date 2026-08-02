@@ -8,10 +8,11 @@ da interface. A janela está em `app.py`; estado e modelo estão em `sim/`.
 ```mermaid
 flowchart LR
     Controls[Controles da UI] --> Simulator
-    Simulator --> Controller[ProportionalController]
+    Simulator --> Controller[DigitalServoController]
     Simulator --> Plant[FirstOrderPlant]
     Simulator --> Faults[FaultModel]
     Simulator --> Encoder[DiscreteEncoder]
+    Simulator --> Metrics[RollingRmsError]
     Simulator --> SimState
     SimState --> Telemetry[Telemetria e gráficos]
     Simulator --> Animation[Animação dos SVGs]
@@ -37,10 +38,11 @@ arquitetural do projeto.
 
 Permanece como fachada compatível, recebe comandos de transporte e coordena:
 
-- `ProportionalController`, em `sim/controller.py`;
+- `DigitalServoController`, em `sim/controller.py`;
 - `FirstOrderPlant`, em `sim/plant.py`;
 - `FaultModel`, em `sim/faults.py`;
 - `DiscreteEncoder`, em `sim/encoder.py`;
+- `RollingRmsError`, em `sim/metrics.py`;
 - `FixedStepScheduler`, em `sim/runtime.py`;
 - `SimState`, em `sim/state.py`.
 

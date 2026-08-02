@@ -19,13 +19,13 @@ class SimulatorCharacterizationTests(unittest.TestCase):
                 simulator.set_transport(mode)
                 self.assertEqual(simulator.step(0.01).rpm_setpoint, setpoint)
 
-    def test_pwm_is_saturated(self):
+    def test_open_loop_uses_nominal_command(self):
         simulator = Simulator()
         simulator.set_transport("PLAY")
-        self.assertEqual(simulator.step(0.01).pwm, 1.0)
+        self.assertEqual(simulator.step(0.01).pwm, 0.6)
 
-        simulator.s.rpm = 3000.0
-        self.assertEqual(simulator.step(0.01).pwm, -1.0)
+        simulator.set_transport("FF")
+        self.assertAlmostEqual(simulator.step(0.01).pwm, 2600.0 / 3000.0)
 
     def test_first_order_response_uses_elapsed_time(self):
         simulator = Simulator()
@@ -81,7 +81,38 @@ class SimulatorCharacterizationTests(unittest.TestCase):
         self.assertEqual(state.encoder_rpm_raw, 0.0)
         self.assertEqual(state.encoder_rpm_filtered, 0.0)
         self.assertGreater(state.rpm, 0.0)
-        self.assertEqual(state.pwm, 1.0)
+        self.assertEqual(state.pwm, 0.6)
+
+    def test_dropout_falls_back_to_nominal_command(self):
+        simulator = Simulator()
+        simulator.set_transport("PLAY")
+        simulator.s.digital_tach_enabled = True
+        for _ in range(1000):
+            simulator.step(0.001)
+
+        simulator.s.encoder_dropout = True
+        for _ in range(251):
+            state = simulator.step(0.001)
+
+        self.assertTrue(state.digital_tach_enabled)
+        self.assertTrue(state.control_fallback)
+        self.assertFalse(simulator.controller.enabled)
+        self.assertAlmostEqual(state.command_applied, state.command_nominal)
+
+    def test_pid_reenters_smoothly_after_dropout(self):
+        simulator = Simulator()
+        simulator.set_transport("PLAY")
+        simulator.s.digital_tach_enabled = True
+        simulator.s.encoder_dropout = True
+        for _ in range(300):
+            simulator.step(0.001)
+
+        before = simulator.s.command_applied
+        simulator.s.encoder_dropout = False
+        after = simulator.step(0.001).command_applied
+
+        self.assertFalse(simulator.s.control_fallback)
+        self.assertAlmostEqual(after, before)
 
 
 if __name__ == "__main__":

@@ -32,8 +32,8 @@ class DiscreteEncoder:
         jitter_level: float = 0.0,
         pulse_loss: float = 0.0,
         dropout: bool = False,
-    ) -> tuple[int, float, float]:
-        """Devolve pulsos acumulados e as RPM bruta e filtrada."""
+    ) -> tuple[int, float, float, bool]:
+        """Devolve pulsos, RPM bruta/filtrada e sinal de nova medição."""
         jitter_level = min(max(jitter_level, 0.0), 1.0)
         pulse_loss = min(max(pulse_loss, 0.0), 1.0)
         generated = max(physical_rpm, 0.0) / 60.0 * dt
@@ -52,7 +52,8 @@ class DiscreteEncoder:
         self._window_pulses += accepted
         self._window_elapsed += dt
 
-        if self._window_elapsed >= self.measurement_window_s:
+        measurement_updated = self._window_elapsed >= self.measurement_window_s
+        if measurement_updated:
             rpm_from_pulses = (
                 self._window_pulses
                 * 60.0
@@ -67,4 +68,9 @@ class DiscreteEncoder:
             self._window_elapsed = 0.0
             self._window_pulses = 0
 
-        return self.total_pulses, self.raw_rpm, self.filtered_rpm
+        return (
+            self.total_pulses,
+            self.raw_rpm,
+            self.filtered_rpm,
+            measurement_updated,
+        )

@@ -7,9 +7,8 @@ O modelo atual existe para demonstrar o loop de controle e sua visualização. E
 e não devem ser usados como previsões físicas.
 
 `Simulator`, em `sim/model.py`, coordena componentes separados para estado,
-controle proporcional, planta de primeira ordem, falhas e medição visual. Essa
-separação preserva as equações descritas abaixo; os novos modelos aprovados ainda
-não estão ativos.
+controle digital, planta de primeira ordem, falhas e encoder discreto. A change
+`digital-servo-foundations` permanece em revisão conjunta.
 
 ## Estado
 
@@ -47,17 +46,42 @@ Qualquer string diferente de `PLAY`, `FF`, `REW` e `PAUSE` recebe setpoint zero,
 embora seu texto seja preservado no campo `transport`. Não há validação explícita
 dos nomes de modo.
 
-## Controlador proporcional
+## Controle digital em revisão
 
-O erro e o comando são calculados por:
+Em `Digital Tach OFF`, a planta recebe comando nominal em malha aberta:
 
 ```text
-error = rpm_setpoint - rpm
-pwm = clamp(Kp × error, -1, 1)
-Kp = 0.02
+command_nominal = rpm_setpoint / 3000
 ```
 
-Não existem termos integral ou derivativo.
+Em `ON`, um PID usa `encoder_rpm_filtered` e soma sua correção ao nominal. Os
+ganhos iniciais são `Kp=0,001`, `Ki=0,002` e `Kd=0`. A derivada atua sobre
+a medição e usa o intervalo real entre janelas de encoder, normalmente `10 ms`;
+seu valor é mantido entre amostras. A integral é condicional durante saturação e
+o comando final fica em `[-1,+1]`. Transições usam bias linear de `250 ms`.
+
+Dropout durante `ON` ativa `FALLBACK`: a correção é retirada em `250 ms` e o
+comando retorna ao nominal. Quando o sinal retorna, o PID reentra sem salto.
+
+### Benchmark provisório
+
+O benchmark da change mede a RPM física durante `5 s`, depois de `3 s` de
+estabilização, em `PLAY` com wow contínuo de `0,5 Hz/1%` e demais falhas
+desligadas. A meta provisória é RMS de até `1,8 RPM` (`0,1%`); até `3,6 RPM`
+(`0,2%`) ainda é aceitável. Com `Kd = 0`, a execução automatizada obteve
+aproximadamente `1,47 RPM` (`0,0815%`), atingindo a meta sem saturação. Esses
+valores não constituem validação em hardware.
+
+O cenário adicional de estresse usa todos os parâmetros de wow no máximo. Com
+os ganhos padrão, sua primeira janela completa após estabilização produz cerca
+de `0,255%`, sem saturação. Seu limite de regressão é `0,5%`; as metas
+profissionais de `0,1%/0,2%` continuam restritas ao benchmark padrão.
+
+`RollingRmsError`, em `sim/metrics.py`, executa essa medição no núcleo. A métrica
+é reiniciada a cada mudança de setpoint, Digital Tach, ganho, falha ou parâmetro
+de wow/flutter. Ela retorna indisponível durante os `3 s` de estabilização e
+mantém uma janela móvel de `5 s`. O gráfico mostra o RMS percentual e referências
+horizontais em `0,1%` e `0,2%`.
 
 ## Dinâmica do motor
 
@@ -77,7 +101,8 @@ O slider produz uma carga equivalente em RPM:
 
 ```text
 friction_load = tape_friction × 600
-target = rpm_setpoint - friction_load × abs(pwm)
+target = max(command_applied, 0) × 3000
+target = target - friction_load × abs(command_applied)
 target = max(target, 0)
 ```
 
@@ -97,9 +122,8 @@ jitter = normal(μ=0, σ=1) × encoder_jitter × 20 RPM
 Perda de pulsos entre `0%` e `100%` é aplicada individualmente; dropout descarta
 todos os pulsos. A sequência pseudoaleatória usa semente `3301`. Um filtro
 passa-baixas de primeira ordem com constante de `50 ms` reduz os degraus de
-`60 RPM`. As medições bruta e filtrada são observáveis, mas o controlador
-proporcional e a animação continuam usando `rpm` física até a implementação do
-PID; o PID usará inicialmente a RPM filtrada.
+`60 RPM`. As medições bruta e filtrada são observáveis. A animação usa `rpm`
+física; em `Digital Tach ON`, o PID usa a RPM filtrada.
 
 ## Wow e flutter em revisão
 
@@ -157,13 +181,13 @@ zero.
 
 - Não há raio variável, inércia ou quantidade de fita por bobina.
 - Não há acoplamento mecânico entre bobinas, fita e capstan.
-- A medição do encoder ainda não realimenta o controlador.
+- A medição filtrada realimenta somente o modo `Digital Tach ON`.
 - Não há escorregamento, back-tension ou saturação física de torque.
 - A tensão é apenas um indicador.
 - A direção reversa ainda não existe.
 - Os parâmetros não foram calibrados com dados experimentais; essa calibração
   está registrada na Issue [#14](https://github.com/gut0leao/tapepilot-sim/issues/14).
-- O controlador proporcional está sempre ativo; não existe comparação OFF/ON.
+- Os ganhos e parâmetros do controlador não foram calibrados em hardware.
 - Os perfis de wow e flutter são demonstrativos e aguardam revisão integrada.
 - Não há reprodução de áudio ligada à velocidade da fita.
 

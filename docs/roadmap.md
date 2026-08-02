@@ -40,6 +40,7 @@ OFF` e `ON`.
 
 ## 4. Qualidade e manutenção do simulador
 
+- [ ] [Adicionar testes de integração headless por cenários](https://github.com/gut0leao/tapepilot-sim/issues/15).
 - [ ] [Ampliar testes da interface e do runtime](https://github.com/gut0leao/tapepilot-sim/issues/8).
 - [ ] [Implementar o sentido reverso de `REW`](https://github.com/gut0leao/tapepilot-sim/issues/9).
 

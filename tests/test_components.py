@@ -1,5 +1,5 @@
 import unittest
-from sim.controller import ProportionalController
+from sim.controller import DigitalServoController, ProportionalController
 from sim.encoder import DiscreteEncoder
 from sim.faults import EpisodeGate, FaultModel, NaturalDisturbance, WowFlutterGenerator
 from sim.plant import FirstOrderPlant
@@ -13,6 +13,54 @@ class ExtractedComponentTests(unittest.TestCase):
         self.assertEqual(controller.command(10.0), 0.2)
         self.assertEqual(controller.command(100.0), 1.0)
         self.assertEqual(controller.command(-100.0), -1.0)
+
+    def test_pid_enters_without_command_jump(self):
+        controller = DigitalServoController(kp=0.001, ki=0.002, kd=0.0)
+        nominal = 0.6
+
+        controller.set_enabled(True, 1800.0, 1700.0)
+        output = controller.step(1800.0, 1700.0, nominal, 0.001)
+
+        self.assertAlmostEqual(output.applied, nominal)
+
+    def test_pid_derivative_acts_against_measurement_change(self):
+        controller = DigitalServoController(kp=0.0, ki=0.0, kd=0.001)
+        controller.enabled = True
+        controller.previous_measurement = 1000.0
+
+        output = controller.step(1800.0, 1010.0, 0.6, 0.01)
+
+        self.assertLess(output.d, 0.0)
+
+    def test_pid_derivative_uses_encoder_measurement_interval(self):
+        controller = DigitalServoController(kp=0.0, ki=0.0, kd=0.001)
+        controller.enabled = True
+        controller.previous_measurement = 1000.0
+
+        for _ in range(9):
+            output = controller.step(
+                1800.0, 1000.0, 0.6, 0.001, measurement_updated=False
+            )
+        output = controller.step(
+            1800.0, 1010.0, 0.6, 0.001, measurement_updated=True
+        )
+        held = controller.step(
+            1800.0, 1010.0, 0.6, 0.001, measurement_updated=False
+        )
+
+        self.assertAlmostEqual(output.d, -1.0)
+        self.assertEqual(held.d, output.d)
+
+    def test_pid_blocks_integral_that_deepens_saturation(self):
+        controller = DigitalServoController(kp=0.01, ki=0.01, kd=0.0)
+        controller.enabled = True
+        controller.previous_measurement = 0.0
+
+        output = controller.step(1800.0, 0.0, 0.6, 0.001)
+
+        self.assertTrue(output.saturated)
+        self.assertTrue(output.integral_blocked)
+        self.assertEqual(output.i, 0.0)
 
     def test_plant_preserves_first_order_response(self):
         plant = FirstOrderPlant(tau=0.25)
@@ -29,18 +77,19 @@ class ExtractedComponentTests(unittest.TestCase):
         encoder = DiscreteEncoder()
 
         for _ in range(10):
-            pulses, raw, filtered = encoder.step(600.0, 0.001)
+            pulses, raw, filtered, updated = encoder.step(600.0, 0.001)
 
         self.assertEqual(pulses, 10)
         self.assertAlmostEqual(raw, 600.0)
         self.assertGreater(filtered, 0.0)
         self.assertLess(filtered, raw)
+        self.assertTrue(updated)
 
     def test_encoder_dropout_discards_all_pulses(self):
         encoder = DiscreteEncoder()
 
         for _ in range(10):
-            pulses, raw, filtered = encoder.step(600.0, 0.001, dropout=True)
+            pulses, raw, filtered, _ = encoder.step(600.0, 0.001, dropout=True)
 
         self.assertEqual(pulses, 0)
         self.assertEqual(raw, 0.0)
@@ -50,7 +99,9 @@ class ExtractedComponentTests(unittest.TestCase):
         encoder = DiscreteEncoder()
 
         for _ in range(10):
-            pulses, raw, filtered = encoder.step(600.0, 0.001, pulse_loss=1.0)
+            pulses, raw, filtered, _ = encoder.step(
+                600.0, 0.001, pulse_loss=1.0
+            )
 
         self.assertEqual(pulses, 0)
         self.assertEqual(raw, 0.0)
@@ -60,7 +111,7 @@ class ExtractedComponentTests(unittest.TestCase):
         encoder = DiscreteEncoder()
 
         for _ in range(1000):
-            _, raw, filtered = encoder.step(600.0, 0.001)
+            _, raw, filtered, _ = encoder.step(600.0, 0.001)
 
         self.assertAlmostEqual(raw, 600.0)
         self.assertAlmostEqual(filtered, 600.0, places=3)

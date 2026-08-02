@@ -59,8 +59,17 @@ a velocidade física da planta.
   primeira ordem com constante de tempo inicial de `50 ms`.
 - **SC-RF-15:** O futuro PID deve usar a RPM filtrada; dropout deve permanecer
   explícito e não ser inferido da saída do filtro.
+- **SC-RF-16:** Com `Digital Tach ON`, dropout deve retirar a correção em
+  `250 ms` e usar comando nominal; o retorno do sinal deve reativar o PID sem
+  salto de comando.
+- **SC-RF-17:** A derivada deve ser atualizada somente com nova medição do
+  encoder, usando o intervalo real entre amostras, e mantida até a próxima.
 - **TP-RF-11:** Contagem acumulada de pulsos, RPM medida, perda configurada e
   estado de dropout devem estar disponíveis no estado e na telemetria.
+- **TP-RF-12:** O benchmark do PID deve reportar erro RMS da RPM física, erro
+  máximo e tempo em saturação; o RMS percentual deve usar o setpoint como base.
+- **SC-RNF-03:** No benchmark provisório do design, erro RMS de até `0,1%`
+  (`1,8 RPM`) é a meta e até `0,2%` (`3,6 RPM`) é o limite aceitável.
 - **FI-RF-11:** Alterações devem preservar fase e suavizar amplitude.
 - **TP-RF-10:** A telemetria deve distinguir nominal, `P/I/D`, `transfer_bias`,
   comandos solicitado/aplicado, saturação e bloqueio integral.
@@ -158,3 +167,28 @@ a velocidade física da planta.
 - **Quando** erro positivo tenta aprofundá-la;
 - **Então** a integral deve ser bloqueada;
 - **Mas** erro negativo deve permitir integração para sair da saturação.
+
+### DSF-CA-13: fallback de dropout
+
+- **Dado** `Digital Tach ON` e dropout do encoder;
+- **Quando** a correção é removida;
+- **Então** o comando deve convergir ao nominal em `250 ms`;
+- **E** a intenção de controle deve permanecer `ON` com estado `FALLBACK`;
+- **E**, quando o sinal retorna, o PID deve reentrar sem salto de comando.
+
+### DSF-CA-14: derivada sincronizada
+
+- **Dado** PID em `1 ms` e encoder com nova medição a cada `10 ms`;
+- **Quando** a medição filtrada muda;
+- **Então** a derivada deve dividir a variação pelo intervalo acumulado de
+  `10 ms`, não pelo último passo de `1 ms`;
+- **E** seu valor deve permanecer constante até a próxima medição.
+
+### DSF-CA-15: benchmark provisório do servo
+
+- **Dado** `PLAY`, wow padrão contínuo e demais falhas desligadas;
+- **Quando** os primeiros `3 s` são descartados e os `5 s` seguintes medidos;
+- **Então** o erro RMS da RPM física deve ser reportado em RPM e percentual;
+- **E** até `0,1%` deve ser classificado como meta atingida;
+- **E** entre `0,1%` e `0,2%`, como aceitável provisório;
+- **E** acima de `0,2%`, como fora do limite provisório.

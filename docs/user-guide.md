@@ -7,6 +7,7 @@ Execute `python3 app.py` na raiz do repositório. A aplicação abre uma janela 
 
 A tela é dividida em:
 
+- faixa fixa de telemetria no topo;
 - cena mecânica com duas bobinas e um capstan;
 - painel de transporte, falhas e telemetria;
 - quatro gráficos na parte inferior.
@@ -23,6 +24,24 @@ A tela é dividida em:
 
 `REW` ainda não inverte o sentido. Esse comportamento está registrado como
 limitação e possui uma proposta de mudança em elaboração.
+
+## Controle digital
+
+`Digital Tach ON` fecha a malha usando a RPM filtrada do encoder. Os sliders
+`Kp`, `Ki` e `Kd` alteram os ganhos durante a execução; os padrões demonstrativos
+são respectivamente `0,001`, `0,002` e `0`. Em `OFF`, a planta usa apenas
+o comando nominal correspondente ao setpoint.
+
+O termo derivativo permanece disponível, mas inicia zerado porque, com o encoder
+simulado atual, ele amplifica mais a quantização residual do que o wow físico.
+
+As transições levam `250 ms` para evitar saltos. Se houver dropout com a chave
+ligada, a telemetria mostra `FALLBACK` e a correção converge ao comando nominal.
+Quando o sinal retorna, o PID é retomado suavemente.
+
+Para comparação provisória, considere erro RMS de até `0,1%` como meta e até
+`0,2%` como aceitável. Em `1800 RPM`, isso equivale a `1,8 RPM` e `3,6 RPM`.
+Essas metas usam a RPM física e ainda aguardam calibração com hardware real.
 
 ## Injeção de falhas
 
@@ -72,11 +91,14 @@ não medições de um equipamento real.
 
 ## Telemetria
 
-O painel mostra:
+A faixa fixa acima da cena mecânica mostra:
 
 - modo de transporte;
 - RPM simulada e setpoint;
 - PWM e erro;
+- estado `OFF`, `ON` ou `FALLBACK`, termos `P/I/D`, bias, comandos solicitado e
+  aplicado, saturação e bloqueio da integral;
+- erro RMS percentual ou indicação `estabilizando`;
 - níveis de atrito e jitter;
 - RPM bruta e filtrada, pulsos acumulados, perda e dropout do encoder;
 - valores instantâneos de wow e flutter;
@@ -86,15 +108,22 @@ O texto pode ser selecionado com o mouse.
 
 ## Gráficos
 
-Os gráficos são atualizados em tempo real e preservam os últimos 20 segundos:
+Os cinco gráficos são atualizados em tempo real e preservam os últimos 20 segundos:
 
 - RPM desejada, física, bruta do encoder e filtrada do encoder;
-- PWM/comando;
+- comandos solicitado e aplicado;
 - erro de controle;
 - tensão simulada.
+- erro RMS percentual móvel.
 
-As duas curvas do gráfico de RPM ainda não possuem legenda própria. Os gráficos
-usam antialiasing para melhorar a apresentação.
+O RMS descarta `3 s` depois de cada mudança de setpoint e usa uma janela móvel
+de até `5 s`. Mudanças de Digital Tach, ganhos, falhas ou parâmetros de
+wow/flutter também reiniciam a estabilização e a janela. A linha verde marca a
+meta de `0,1%`; a vermelha, o limite provisório de `0,2%`. Em `STOP`, a métrica
+fica indisponível.
+
+As curvas possuem legendas e cores distintas. Os gráficos usam antialiasing
+para melhorar a apresentação.
 
 ## Cena mecânica
 

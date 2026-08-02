@@ -1,0 +1,12 @@
+{
+  "name": "play_then_stop",
+  "duration_seconds": 8,
+  "events": [
+    {"at": 0, "transport": "PLAY"},
+    {"at": 5, "transport": "STOP"}
+  ],
+  "expect": [
+    {"path": "final.rpm", "max": 0.1},
+    {"path": "final.command_applied", "equals": 0.0}
+  ]
+}

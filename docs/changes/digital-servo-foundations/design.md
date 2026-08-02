@@ -111,9 +111,23 @@ separado porque o filtro leva algum tempo para decair.
 Em `OFF`, a planta recebe somente o comando nominal fixo. Em `ON`, recebe a
 mesma base somada ao PID. A derivada atua sobre a medição.
 
+O PID executa a cada `1 ms`, mas a derivada só é recalculada quando o encoder
+sinaliza uma nova medição. Ela usa o tempo acumulado entre amostras — tipicamente
+`10 ms` — e é mantida até a janela seguinte. Isso evita amplificar em dez vezes
+os degraus do encoder.
+
+Os ganhos iniciais demonstrativos são `Kp = 0,001`, `Ki = 0,002` e `Kd = 0`,
+todos ajustáveis em execução. O termo derivativo fica disponível, mas começa
+zerado porque amplificou a quantização residual do encoder simulado. Esses
+valores não representam calibração de hardware.
+
 Em `OFF → ON`, `transfer_bias = -(P + I + D)` produz correção inicial zero e
 decai em `250 ms`, inclusive com `Ki = 0`. Em `ON → OFF`, o PID deixa de reagir
 ao encoder e sua última correção decai em `250 ms`; os estados são então limpos.
+
+Dropout durante `ON` produz `FALLBACK`: a correção decai em `250 ms` até o
+comando nominal, sem alterar a intenção da chave. O retorno dos pulsos reativa o
+PID usando a mesma transferência suave de entrada.
 
 ## Anti-windup e telemetria
 
@@ -123,6 +137,30 @@ ajuda a sair dela. Seu termo fica entre `-1 - comando_nominal` e
 
 A telemetria distingue comando nominal, `P`, `I`, `D`, `transfer_bias`, comandos
 solicitado e aplicado, saturação, tempo saturado e bloqueio da integral.
+
+## Metas provisórias de velocidade
+
+Como referência inicial de gravador profissional, o projeto adota a tolerância
+de velocidade de `±0,2%` e o drift máximo de `0,1%` publicados para o Studer
+A80. Em `1800 RPM`, correspondem respectivamente a `±3,6 RPM` e `±1,8 RPM`.
+Especificações de wow/flutter não são comparadas diretamente à RPM bruta do
+encoder, cuja quantização é uma propriedade da medição.
+
+O benchmark reproduzível inicial usa:
+
+- `PLAY` em `1800 RPM`;
+- wow em `0,5 Hz`, intensidade `1%` e ocorrência `100%`;
+- flutter, atrito, jitter, perda de pulsos e dropout desligados;
+- descarte dos primeiros `3 s` e medição nos `5 s` seguintes;
+- erro calculado sobre a RPM física, não sobre o encoder.
+
+Nesse benchmark, `RMS ≤ 1,8 RPM` (`0,1%`) é a meta e
+`RMS ≤ 3,6 RPM` (`0,2%`) é o limite aceitável provisório. Erro máximo e tempo em
+saturação são reportados separadamente. As referências são as
+[especificações do Studer A80](https://www.vintagedigital.com.au/studer-a80/)
+e seu [manual](https://www.scribd.com/document/581382262/Studer-A80-manual).
+Esses limites serão revistos pela Issue
+[#14](https://github.com/gut0leao/tapepilot-sim/issues/14) após medições físicas.
 
 ## Riscos
 

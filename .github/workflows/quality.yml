@@ -21,5 +21,8 @@ jobs:
       - name: Run characterization tests
         run: python3 -m unittest discover -v
 
+      - name: Run headless integration scenarios
+        run: python3 tools/run_scenarios.py
+
       - name: Compile Python sources
         run: python3 -m py_compile app.py sim/*.py tests/*.py tools/*.py

@@ -1,0 +1,12 @@
+{
+  "name": "dropout_fallback",
+  "duration_seconds": 8,
+  "events": [
+    {"at": 0, "transport": "PLAY", "state": {"digital_tach_enabled": true}},
+    {"at": 5, "state": {"encoder_dropout": true}}
+  ],
+  "expect": [
+    {"path": "final.control_fallback", "equals": true},
+    {"path": "final.command_applied", "min": 0.5999, "max": 0.6001}
+  ]
+}

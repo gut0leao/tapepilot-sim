@@ -7,9 +7,10 @@ e reutilizado separadamente da interface.
 
 import math
 
-from .controller import ProportionalController
+from .controller import DigitalServoController
 from .encoder import DiscreteEncoder
 from .faults import FaultModel
+from .metrics import RollingRmsError
 from .plant import FirstOrderPlant
 from .runtime import FixedStepScheduler
 from .state import SimState
@@ -20,11 +21,13 @@ class Simulator:
 
     def __init__(self):
         self.s = SimState()
-        self.controller = ProportionalController()
+        self.controller = DigitalServoController()
+        self.plant_max_rpm = 3000.0
         self.plant = FirstOrderPlant()
         self.faults = FaultModel()
         self.encoder = DiscreteEncoder()
         self.scheduler = FixedStepScheduler()
+        self.rms_error = RollingRmsError()
 
     @property
     def Kp(self):
@@ -66,11 +69,38 @@ class Simulator:
         else:
             self.s.rpm_setpoint = 0.0
 
-        self.s.err = self.s.rpm_setpoint - self.s.rpm
-        self.s.pwm = self.controller.command(self.s.err)
+        self.s.err = self.s.rpm_setpoint - self.s.encoder_rpm_filtered
+        nominal = self.s.rpm_setpoint / self.plant_max_rpm
+        self.s.control_fallback = (
+            self.s.digital_tach_enabled and self.s.encoder_dropout
+        )
+        self.controller.set_enabled(
+            self.s.digital_tach_enabled and not self.s.control_fallback,
+            self.s.rpm_setpoint,
+            self.s.encoder_rpm_filtered,
+        )
+        control = self.controller.step(
+            self.s.rpm_setpoint,
+            self.s.encoder_rpm_filtered,
+            nominal,
+            dt,
+            self.s.encoder_measurement_updated,
+        )
+        self.s.command_nominal = control.nominal
+        self.s.pid_p = control.p
+        self.s.pid_i = control.i
+        self.s.pid_d = control.d
+        self.s.transfer_bias = control.transfer_bias
+        self.s.command_requested = control.requested
+        self.s.command_applied = control.applied
+        self.s.actuator_saturated = control.saturated
+        self.s.integral_blocked = control.integral_blocked
+        self.s.pwm = control.applied
+        if control.saturated:
+            self.s.saturated_time_s += dt
 
         target, self.s.tension = self.faults.apply_friction(
-            self.s.rpm_setpoint,
+            max(self.s.command_applied, 0.0) * self.plant_max_rpm,
             self.s.pwm,
             self.s.tape_friction,
         )
@@ -81,11 +111,33 @@ class Simulator:
             self.s.speed_disturbance,
         ) = self.faults.apply_speed_disturbance(target, dt)
         self.s.rpm = self.plant.advance(self.s.rpm, target, dt)
+        rms_context = (
+            self.s.digital_tach_enabled,
+            self.s.tape_friction,
+            self.s.encoder_jitter,
+            self.s.encoder_pulse_loss,
+            self.s.encoder_dropout,
+            self.controller.kp,
+            self.controller.ki,
+            self.controller.kd,
+            self.faults.disturbances.wow.frequency_hz,
+            self.faults.disturbances.wow.amplitude,
+            self.faults.disturbances.wow.occurrence,
+            self.faults.disturbances.wow.mean_duration,
+            self.faults.disturbances.flutter.frequency_hz,
+            self.faults.disturbances.flutter.amplitude,
+            self.faults.disturbances.flutter.occurrence,
+            self.faults.disturbances.flutter.mean_duration,
+        )
+        self.s.rms_error_percent = self.rms_error.step(
+            dt, self.s.rpm_setpoint, self.s.rpm, rms_context
+        )
 
         (
             self.s.encoder_pulse_count,
             self.s.encoder_rpm_raw,
             self.s.encoder_rpm_filtered,
+            self.s.encoder_measurement_updated,
         ) = self.encoder.step(
             self.s.rpm,
             dt,
