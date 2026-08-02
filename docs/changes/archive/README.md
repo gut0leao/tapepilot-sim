@@ -9,5 +9,5 @@ AAAA-MM-DD-nome-da-mudanca/
 O conteúdo arquivado preserva contexto, deltas e evidências. O comportamento
 vigente deve ser consultado nas specs de capacidade, não no arquivo histórico.
 
-Ainda não há mudanças arquivadas.
-
+- [`2026-08-01-digital-servo-foundations/`](2026-08-01-digital-servo-foundations/)
+  — núcleo determinístico, perturbações, encoder e servo digital do item 2.

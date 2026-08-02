@@ -7,8 +7,7 @@ O modelo atual existe para demonstrar o loop de controle e sua visualização. E
 e não devem ser usados como previsões físicas.
 
 `Simulator`, em `sim/model.py`, coordena componentes separados para estado,
-controle digital, planta de primeira ordem, falhas e encoder discreto. A change
-`digital-servo-foundations` permanece em revisão conjunta.
+controle digital, planta de primeira ordem, falhas e encoder discreto.
 
 ## Estado
 
@@ -46,7 +45,7 @@ Qualquer string diferente de `PLAY`, `FF`, `REW` e `PAUSE` recebe setpoint zero,
 embora seu texto seja preservado no campo `transport`. Não há validação explícita
 dos nomes de modo.
 
-## Controle digital em revisão
+## Controle digital
 
 Em `Digital Tach OFF`, a planta recebe comando nominal em malha aberta:
 
@@ -65,7 +64,7 @@ comando retorna ao nominal. Quando o sinal retorna, o PID reentra sem salto.
 
 ### Benchmark provisório
 
-O benchmark da change mede a RPM física durante `5 s`, depois de `3 s` de
+O benchmark do projeto mede a RPM física durante `5 s`, depois de `3 s` de
 estabilização, em `PLAY` com wow contínuo de `0,5 Hz/1%` e demais falhas
 desligadas. A meta provisória é RMS de até `1,8 RPM` (`0,1%`); até `3,6 RPM`
 (`0,2%`) ainda é aceitável. Com `Kd = 0`, a execução automatizada obteve
@@ -109,7 +108,7 @@ target = max(target, 0)
 Essa fórmula é uma heurística e não uma equação mecânica. O limite inferior em
 zero também impede, no estado atual, a representação do sentido reverso.
 
-## Encoder discreto em revisão
+## Encoder discreto
 
 O encoder gera `100 pulsos/revolução`. Frações são acumuladas a cada passo e a
 medição é atualizada em janelas de `10 ms`:
@@ -125,9 +124,9 @@ passa-baixas de primeira ordem com constante de `50 ms` reduz os degraus de
 `60 RPM`. As medições bruta e filtrada são observáveis. A animação usa `rpm`
 física; em `Digital Tach ON`, o PID usa a RPM filtrada.
 
-## Wow e flutter em revisão
+## Wow e flutter
 
-A implementação em revisão combina ruído filtrado, envelope variável e uma
+A implementação combina ruído filtrado, envelope variável e uma
 pequena senoide residual para modular o alvo físico da planta. Wow usa padrão
 `0,5 Hz`, `1%` e episódios médios de `3 s`; flutter, `8 Hz`, `0,3%` e
 episódios médios de `0,5 s`.
@@ -188,12 +187,12 @@ zero.
 - Os parâmetros não foram calibrados com dados experimentais; essa calibração
   está registrada na Issue [#14](https://github.com/gut0leao/tapepilot-sim/issues/14).
 - Os ganhos e parâmetros do controlador não foram calibrados em hardware.
-- Os perfis de wow e flutter são demonstrativos e aguardam revisão integrada.
+- Os perfis de wow e flutter são demonstrativos e aguardam calibração física.
 - Não há reprodução de áudio ligada à velocidade da fita.
 
-A evolução do núcleo está aprovada em
-`docs/changes/digital-servo-foundations/`. A demonstração de áudio permanece em
-`docs/changes/audible-digital-tach-demo/`.
+O histórico da evolução do núcleo está arquivado em
+`docs/changes/archive/2026-08-01-digital-servo-foundations/`. A demonstração de
+áudio permanece proposta em `docs/changes/audible-digital-tach-demo/`.
 
 Qualquer mudança nas equações ou no significado das variáveis deve começar por
 um delta aprovado e, ao ser concluída, atualizar este documento e as specs

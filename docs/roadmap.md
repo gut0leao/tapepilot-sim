@@ -23,10 +23,10 @@ OFF` e `ON`.
 
 ## 2. Fundamentos do servo digital
 
-- [ ] [Separar planta, controlador, encoder e falhas](https://github.com/gut0leao/tapepilot-sim/issues/4).
-- [ ] [Modelar distúrbios reproduzíveis de wow e flutter](https://github.com/gut0leao/tapepilot-sim/issues/12).
-- [ ] [Modelar encoder discreto e falhas de sinal](https://github.com/gut0leao/tapepilot-sim/issues/5).
-- [ ] [Implementar controlador PID ajustável](https://github.com/gut0leao/tapepilot-sim/issues/7).
+- [x] [Separar planta, controlador, encoder e falhas](https://github.com/gut0leao/tapepilot-sim/issues/4).
+- [x] [Modelar distúrbios reproduzíveis de wow e flutter](https://github.com/gut0leao/tapepilot-sim/issues/12).
+- [x] [Modelar encoder discreto e falhas de sinal](https://github.com/gut0leao/tapepilot-sim/issues/5).
+- [x] [Implementar controlador PID ajustável](https://github.com/gut0leao/tapepilot-sim/issues/7).
 - [x] Definir unidades, limites do atuador e taxas de amostragem no design da
   change do épico #10.
 

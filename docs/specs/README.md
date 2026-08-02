@@ -16,10 +16,10 @@ no Git e na proposta arquivada em `docs/changes/archive/`.
 |---|---|---|
 | [Modos de transporte](transport-modes/spec.md) | `Implemented` | modos, setpoints e seleção |
 | [Controle de velocidade](speed-control/spec.md) | `Implemented` | erro, controlador e resposta |
-| [Injeção de falhas](fault-injection/spec.md) | `Implemented` | atrito, jitter e tensão |
+| [Injeção de falhas](fault-injection/spec.md) | `Implemented` | perturbações físicas, encoder e falhas |
 | [Visualização mecânica](mechanics-visualization/spec.md) | `Implemented` | SVGs, escalas e movimento |
-| [Telemetria e gráficos](telemetry-and-plots/spec.md) | `Implemented` | dados exibidos e histórico |
-| [Runtime da simulação](simulation-runtime/spec.md) | `Implemented` | temporização, separação e execução |
+| [Telemetria e gráficos](telemetry-and-plots/spec.md) | `Implemented` | observabilidade, métricas e histórico |
+| [Runtime da simulação](simulation-runtime/spec.md) | `Implemented` | temporização, separação e cenários headless |
 
 ## Granularidade
 

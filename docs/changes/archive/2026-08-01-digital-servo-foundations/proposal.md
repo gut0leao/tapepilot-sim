@@ -1,6 +1,6 @@
 # Fundamentos do servo digital
 
-- **Estado:** In Progress
+- **Estado:** Implemented
 - **Data:** 2026-08-01
 - **Specs afetadas:** `speed-control`, `fault-injection`,
   `telemetry-and-plots`, `simulation-runtime`
@@ -54,13 +54,14 @@ perturbações surgem em episódios determinísticos, mas irregulares.
 ## Evidências de implementação
 
 - **Código:** componentes extraídos em `sim/state.py`, `controller.py`,
-  `plant.py`, `faults.py` e `encoder.py`; scheduler fixo, wow/flutter e encoder
-  discreto e PID estão implementados localmente para revisão.
+  `plant.py`, `faults.py` e `encoder.py`; scheduler fixo, wow/flutter, encoder
+  discreto, filtro, PID e fallback estão incorporados.
 - **Testes:** quarenta e dois testes e oito cenários de integração headless passam, incluindo
   scheduler, perturbações, encoder, PID, fallback, transferências e RMS móvel;
   workflow [Quality 30703602470](https://github.com/gut0leao/tapepilot-sim/actions/runs/30703602470) aprovado.
-- **Validação manual:** interface, controles naturais e episódios aleatórios de
-  wow/flutter, encoder bruto e filtrado aprovados pelo mantenedor em 2026-08-01,
-  sem regressões aparentes.
-- **Commit/PR:** commit `6e58f98` implementa a extração da Issue #4.
+- **Validação manual:** toda a entrega do item 2, incluindo interface,
+  perturbações, encoder, filtro, PID, fallback e métricas, foi aprovada pelo
+  mantenedor em 2026-08-01, sem regressões aparentes.
+- **Commits:** `6e58f98` inicia a extração da Issue #4 e `f79d4a1` consolida o
+  servo digital e os cenários headless.
 - **Limitações remanescentes:** parâmetros ainda não identificados fisicamente.

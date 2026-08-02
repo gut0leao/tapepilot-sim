@@ -5,7 +5,7 @@
 - **Specs afetadas:** `telemetry-and-plots`, `simulation-runtime`; nova
   capacidade `audio-playback`
 - **Issue:** [#10 — Demonstrar estabilização audível do servo digital](https://github.com/gut0leao/tapepilot-sim/issues/10)
-- **Dependência:** [Fundamentos do servo digital](../digital-servo-foundations/proposal.md)
+- **Dependência:** [Fundamentos do servo digital](../archive/2026-08-01-digital-servo-foundations/proposal.md)
 
 ## Problema
 

@@ -37,7 +37,7 @@ da aprovação desta mudança.
 - **SC-RF-06:** A RPM simulada deve admitir valores negativos.
 - **SC-RF-07:** O atrito deve reduzir o módulo da velocidade-alvo nos dois
   sentidos.
-- **TP-RF-06:** Telemetria e gráfico devem exibir RPM e setpoint negativos em
+- **TP-RF-12:** Telemetria e gráfico devem exibir RPM e setpoint negativos em
   `REW`.
 
 ## Critérios de aceitação adicionados
@@ -65,6 +65,6 @@ da aprovação desta mudança.
 
 ## Nota de consistência
 
-Embora adicione `TP-RF-06`, esta proposta não altera a arquitetura de telemetria:
+Embora adicione `TP-RF-12`, esta proposta não altera a arquitetura de telemetria:
 ela já exibe os valores fornecidos pelo estado. A spec `telemetry-and-plots`
 deverá receber o requisito ao incorporar o delta.

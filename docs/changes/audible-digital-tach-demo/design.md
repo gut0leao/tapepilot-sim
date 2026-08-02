@@ -30,7 +30,7 @@ assets deve ser concluída antes da introdução do WAV.
 
 A mesma amostra e configuração de perturbações deve ser usada em `OFF` e `ON`.
 A interface apresenta erro RMS, desvio máximo, overshoot e tempo em saturação,
-sem duplicar toda a telemetria interna da change de fundamentos.
+sem duplicar toda a telemetria interna do núcleo.
 
 ## Riscos
 

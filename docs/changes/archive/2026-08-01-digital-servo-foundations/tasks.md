@@ -6,7 +6,7 @@
 - [x] [Modelar wow e flutter reproduzíveis](https://github.com/gut0leao/tapepilot-sim/issues/12).
 - [x] [Modelar encoder e falhas de medição](https://github.com/gut0leao/tapepilot-sim/issues/5).
 - [x] [Implementar PID ajustável](https://github.com/gut0leao/tapepilot-sim/issues/7).
-- [ ] Validar critérios `DSF-CA-01` a `DSF-CA-06`.
-- [ ] Incorporar o delta às quatro specs vigentes.
-- [ ] Atualizar documentação clássica e changelog.
-- [ ] Registrar evidências e arquivar a change.
+- [x] Validar critérios `DSF-CA-01` a `DSF-CA-15`.
+- [x] Incorporar o delta às quatro specs vigentes.
+- [x] Atualizar documentação clássica e changelog.
+- [x] Registrar evidências e arquivar a change.

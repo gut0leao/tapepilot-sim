@@ -3,7 +3,7 @@
 ## Dependência
 
 Esta change pressupõe os requisitos da
-[change de fundamentos](../digital-servo-foundations/spec-delta.md).
+[change de fundamentos](../archive/2026-08-01-digital-servo-foundations/spec-delta.md).
 
 ## Specs afetadas
 
@@ -13,10 +13,11 @@ Esta change pressupõe os requisitos da
 
 ## Requisitos adicionados
 
-- **TP-RF-08:** A interface deve mostrar `Digital Tach OFF/ON`.
-- **TP-RF-09:** A comparação deve apresentar erro RMS, desvio máximo, overshoot
+- **TP-RF-10:** A interface deve mostrar `Digital Tach OFF/ON` na comparação
+  audível.
+- **TP-RF-11:** A comparação deve apresentar erro RMS, desvio máximo, overshoot
   e tempo em saturação.
-- **SR-RF-06:** O processamento de áudio não deve bloquear a interface.
+- **SR-RF-09:** O processamento de áudio não deve bloquear a interface.
 
 ## Nova capacidade proposta: audio-playback
 
